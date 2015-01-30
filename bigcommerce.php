@@ -736,6 +736,58 @@ class Client
         }
         return intval($limit);
     }
+
+    /**
+     * get list of blog posts
+     * 
+     * @return  array
+     */
+    public static function getBlogPosts()
+    {
+        return self::getCollection('/blog/posts', 'BlogPost');
+    }
+
+    /**
+     * get a specific blog post by id
+     *
+     * @params  int         $id         post id
+     * @return  stdClass    $object
+     */
+    public static function getBlogPost($id)
+    {
+        return self::getResource('/blog/posts/' . $id, 'BlogPost');
+    }
+
+    /**
+     * create blog post
+     * @param   stdClass    $object     post params
+     * @return  stdClass        
+     */
+    public static function createBlogPost($object)
+    {
+        return self::createResource('/blog/posts', $object);
+    }
+
+    /**
+     * update blog post
+     * @param   int         $id         post id
+     * @param   stdClass    $object     post params
+     * @return  stdClass
+     */
+    public static function updateBlogPost($id, $object)
+    {
+        return self::updateResource('/blog/posts/' . $id, $object);
+    }
+
+    /**
+     * delete a blog post
+     * @param   int         $id         post id
+     * @return  stdClass
+     */
+    public static function deleteBlogPost($id)
+    {
+        return self::deleteResource('/blog/posts/' . $id);
+    }
 }
 namespace Bigcommerce\Api;
 

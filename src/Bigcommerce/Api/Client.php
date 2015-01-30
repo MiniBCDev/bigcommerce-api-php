@@ -970,7 +970,7 @@ class Client
 	 * 
 	 * @return 	array
 	 */
-	public static function listWebhook()
+	public static function getWebhooks()
 	{
 	    return self::getCollection('/hooks', 'Webhook');
 	}
@@ -989,7 +989,7 @@ class Client
 	/**
 	 * create webhook
 	 * @param 	stdClass 	$object 	webhook params
-	 * @return 	stdClass 	 	
+	 * @return 	stdClass
 	 */
 	public static function createWebhook($object)
 	{
@@ -1015,5 +1015,57 @@ class Client
 	public static function deleteWebhook($id)
 	{
 	    return self::deleteResource('/hooks/' . $id);
+	}
+
+	/**
+	 * get list of blog posts
+	 * 
+	 * @return 	array
+	 */
+	public static function getBlogPosts()
+	{
+	    return self::getCollection('/blog/posts', 'BlogPost');
+	}
+
+	/**
+	 * get a specific blog post by id
+	 *
+	 * @params 	int 		$id 		post id
+	 * @return 	stdClass 	$object
+	 */
+	public static function getBlogPost($id)
+	{
+	    return self::getResource('/blog/posts/' . $id, 'BlogPost');
+	}
+
+	/**
+	 * create blog post
+	 * @param 	stdClass 	$object 	post params
+	 * @return 	stdClass 	 	
+	 */
+	public static function createBlogPost($object)
+	{
+	    return self::createResource('/blog/posts', $object);
+	}
+
+	/**
+	 * update blog post
+	 * @param 	int 		$id 		post id
+	 * @param 	stdClass 	$object 	post params
+	 * @return 	stdClass
+	 */
+	public static function updateBlogPost($id, $object)
+	{
+	    return self::updateResource('/blog/posts/' . $id, $object);
+	}
+
+	/**
+	 * delete a blog post
+	 * @param 	int 		$id 		post id
+	 * @return 	stdClass
+	 */
+	public static function deleteBlogPost($id)
+	{
+	    return self::deleteResource('/blog/posts/' . $id);
 	}
 }
