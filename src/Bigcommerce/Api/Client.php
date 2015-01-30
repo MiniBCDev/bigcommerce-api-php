@@ -972,7 +972,7 @@ class Client
 	 */
 	public static function listWebhook()
 	{
-	    return self::getResource('/hooks');
+	    return self::getCollection('/hooks', 'Webhook');
 	}
 
 	/**
@@ -983,7 +983,7 @@ class Client
 	 */
 	public static function getWebhook($id)
 	{
-	    return self::getResource('/hooks/' . $id);
+	    return self::getResource('/hooks/' . $id, 'Webhook');
 	}
 
 	/**

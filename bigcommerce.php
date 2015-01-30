@@ -696,11 +696,11 @@ class Client
     }
     public static function listWebhook()
     {
-        return self::getResource('/hooks');
+        return self::getCollection('/hooks', 'Webhook');
     }
     public static function getWebhook($id)
     {
-        return self::getResource('/hooks/' . $id);
+        return self::getResource('/hooks/' . $id, 'Webhook');
     }
     public static function createWebhook($object)
     {
