@@ -968,7 +968,7 @@ class Client
 	/**
 	 * get list of webhooks
 	 * 
-	 * @return 	array 	??
+	 * @return 	array
 	 */
 	public static function listWebhook()
 	{
@@ -1010,7 +1010,7 @@ class Client
 	/**
 	 * delete a webhook
 	 * @param 	int 		$id 		webhook id
-	 * @return 	stdClass 	??
+	 * @return 	stdClass
 	 */
 	public static function deleteWebhook($id)
 	{
