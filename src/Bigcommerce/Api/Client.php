@@ -1022,9 +1022,10 @@ class Client
 	 * 
 	 * @return 	array
 	 */
-	public static function getBlogPosts()
+	public static function getBlogPosts($filter=false)
 	{
-	    return self::getCollection('/blog/posts', 'BlogPost');
+		$filter = Filter::create($filter);
+	    return self::getCollection('/blog/posts' . $filter->toQuery(), 'BlogPost');
 	}
 
 	/**
