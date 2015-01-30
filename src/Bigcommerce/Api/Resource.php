@@ -57,6 +57,13 @@ class Resource
 		return (isset($this->fields->$field));
 	}
 
+	public function getAllFields()
+	{
+		$resource = $this->fields;
+
+		return $resource;
+	}
+
 	public function getCreateFields()
 	{
 		$resource = $this->fields;
