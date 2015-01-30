@@ -965,6 +965,55 @@ class Client
 		return intval($limit);
 	}
 
+	/**
+	 * get list of webhooks
+	 * 
+	 * @return 	array
+	 */
+	public static function listWebhook()
+	{
+	    return self::getCollection('/hooks', 'Webhook');
+	}
 
+	/**
+	 * get a specific webhook by id
+	 *
+	 * @params 	int 		$id 		webhook id
+	 * @return 	stdClass 	$object
+	 */
+	public static function getWebhook($id)
+	{
+	    return self::getResource('/hooks/' . $id, 'Webhook');
+	}
 
+	/**
+	 * create webhook
+	 * @param 	stdClass 	$object 	webhook params
+	 * @return 	stdClass 	 	
+	 */
+	public static function createWebhook($object)
+	{
+	    return self::createResource('/hooks', $object);
+	}
+
+	/**
+	 * create a webhook
+	 * @param 	int 		$id 		webhook id
+	 * @param 	stdClass 	$object 	webhook params
+	 * @return 	stdClass
+	 */
+	public static function updateWebhook($id, $object)
+	{
+	    return self::updateResource('/hooks/' . $id, $object);
+	}
+
+	/**
+	 * delete a webhook
+	 * @param 	int 		$id 		webhook id
+	 * @return 	stdClass
+	 */
+	public static function deleteWebhook($id)
+	{
+	    return self::deleteResource('/hooks/' . $id);
+	}
 }
