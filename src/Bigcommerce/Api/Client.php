@@ -324,7 +324,7 @@ class Client
 
 	/**
 	 * Swaps a temporary access code for a long expiry auth token.
-	 * 
+	 *
 	 * @param stdClass $object
 	 * @return stdClasss
 	 */
@@ -356,13 +356,75 @@ class Client
 	/**
 	 * Returns the default collection of products.
 	 *
-	 * @param array $filter
+	 * @param mixed $filter
 	 * @return mixed array|string list of products or XML string if useXml is true
 	 */
 	public static function getProducts($filter=false)
 	{
 		$filter = Filter::create($filter);
 		return self::getCollection('/products' . $filter->toQuery(), 'Product');
+	}
+
+	/**
+	 * Returns the total number of products in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return mixed int|string number of products or XML string if useXml is true
+	 */
+	public static function getProductsCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/products/count' . $filter->toQuery());
+	}
+
+	/**
+	 * Returns the collection of configurable fields
+	 *
+	 * @param int $id product id
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getProductConfigurableFields($id, $filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/products/'.$id.'/configurablefields', "ProductConfigurableField");
+	}
+
+	/**
+	 * The total number of configurable fields in the collection.
+	 *
+	 * @param int $id product id
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getProductConfigurableFieldsCount($id, $filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/products/'.$id.'/configurablefields/count' . $filter->toQuery());
+	}
+
+	/**
+	 * Returns the collection of discount rules
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getProductDiscountRules($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/products/discountrule' . $filter->toQuery(), "ProductDiscountRule");
+	}
+
+	/**
+	 * The total number of discount rules in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getProductDiscountRulesCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/products/discountrule/count' . $filter->toQuery());
 	}
 
 	/**
@@ -374,6 +436,115 @@ class Client
 	public static function getProductImages($id)
 	{
 		return self::getResource('/products/' . $id . '/images/', 'ProductImage');
+	}
+
+	/**
+	 * Returns the collection of product images
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getProductsImages($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/products/images' . $filter->toQuery(), "ProductImage");
+	}
+
+	/**
+	 * The total number of product images in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getProductsImagesCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/products/images/count' . $filter->toQuery());
+	}
+
+	/**
+	 * Returns the collection of product options
+	 *
+	 * @param int id product ID
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getProductOptions($id, $filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/products/'.$id.'/options' . $filter->toQuery(), "Option");
+	}
+
+	/**
+	 * Returns the collection of product rules
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getProductRules($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/products/rules'  . $filter->toQuery(), "Rule");
+	}
+
+	/**
+	 * The total number of product rules in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getProductRulesCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/products/rules/count' . $filter->toQuery());
+	}
+
+	/**
+	 * Returns the collection of product skus
+	 *
+	 * @param array $filter
+	 * @return array
+	 */
+	public static function getProductSkus($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/products/skus' . $filter->toQuery(), "Sku");
+	}
+
+	/**
+	 * The total number of product skus in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getProductSkusCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/products/skus/count' . $filter->toQuery());
+	}
+
+	/**
+	 * Returns the collection of product videos
+	 *
+	 * @param array $filter
+	 * @return array
+	 */
+	public static function getProductVideos($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/products/videos' . $filter->toQuery(), "ProductVideo");
+	}
+
+	/**
+	 * The total number of product videos in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getProductVideosCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/products/videos/count' . $filter->toQuery());
 	}
 
 	/**
@@ -435,15 +606,27 @@ class Client
 	}
 
 	/**
-	 * Returns the total number of products in the collection.
+	 * Returns the collection of custom fields
 	 *
-	 * @param array $filter
-	 * @return mixed int|string number of products or XML string if useXml is true
+	 * @param mixed $filter
+	 * @return array
 	 */
-	public static function getProductsCount($filter=false)
+	public static function getProductsCustomFields($filter=false)
 	{
 		$filter = Filter::create($filter);
-		return self::getCount('/products/count' . $filter->toQuery());
+		return self::getCollection('/products/customfields' . $filter->toQuery(), "ProductCustomField");
+	}
+
+	/**
+	 * The total number of custom fields in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getProductsCustomFieldsCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/products/customfields/count' . $filter->toQuery());
 	}
 
 	/**
@@ -491,7 +674,7 @@ class Client
 	/**
 	 * Return the collection of options.
 	 *
-	 * @param array $filter
+	 * @param mixed $filter
 	 * @return array
 	 */
 	public static function getOptions($filter=false)
@@ -562,6 +745,29 @@ class Client
 	{
 		$filter = Filter::create($filter);
 		return self::getCollection('/options/values' . $filter->toQuery(), 'OptionValue');
+	}
+
+	/**
+	 * The number of option values in the collection.
+	 *
+	 * @return int
+	 */
+	public static function getOptionValuesCount()
+	{
+		$count = 0;
+		$page = 1;
+		$filter = Filter::create(array('page'=>$page, 'limit'=>250));
+
+		$data = self::getOptionValues($filter);
+		$count = count($data);
+		while ($data) {
+			$page++;
+			$filter = Filter::create(array('page'=>$page, 'limit'=>250));
+			$data = self::getOptionValues($filter);
+			$count += count($data);
+		}
+
+		return $count;
 	}
 
 	/**
@@ -750,6 +956,111 @@ class Client
 	}
 
 	/**
+	 * Returns the collection of order coupons
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getOrderCoupons($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/orders/coupons' . $filter->toQuery(), 'Coupon');
+	}
+
+	/**
+	 * The total number of order coupons in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getOrderCouponsCount($filter=false)
+	{
+		$count = 0;
+		$page = 1;
+		$filter = Filter::create(array('page'=>$page, 'limit'=>250));
+		$data = self::getOrderCoupons($filter);
+		$count = count($data);
+		while ($data) {
+			$page++;
+			$filter = Filter::create(array('page'=>$page, 'limit'=>250));
+			$data = self::getOrderCoupons($filter);
+			$count += count($data);
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Returns the collection of order products
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getOrderProducts($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/orders/products' . $filter->toQuery(), 'Product');
+	}
+
+	/**
+	 * The total number of order products in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getOrderProductsCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/orders/products/count' . $filter->toQuery());
+	}
+
+	/**
+	 * Returns the collection of order shipments
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getOrderShipments($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/orders/shipments' . $filter->toQuery());
+	}
+
+	/**
+	 * The total number of order shipments in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getOrderShipmentsCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/orders/shipments/count' . $filter->toQuery());
+	}
+
+	/**
+	 * Returns the collection of shipping addresses
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getOrderShippingAddresses($filter=false) {
+		$filter = Filter::create($filter);
+		return self::getCollection('/orders/shippingaddresses/' . $filter->toQuery(), "Address");
+	}
+
+	/**
+	 * The total number of shipping addresses in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getOrderShippingAddressesCount($filter=false) {
+		$filter = Filter::create($filter);
+		return self::getCount('/orders/shippingaddresses/count' . $filter->toQuery());
+	}
+
+	/**
 	 * The list of customers.
 	 *
 	 * @param mixed $filter
@@ -839,9 +1150,57 @@ class Client
 	}
 
 	/**
+	 * Returns the collection of customer addresses
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getCustomersAddresses($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/customers/addresses' . $filter->toQuery(), "Address");
+	}
+
+	/**
+	 * The number of customer addresses in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getCustomersAddressesCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/customers/addresses/count' . $filter->toQuery());
+	}
+
+	/**
+	 * Returns the collection of customer groups
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getCustomerGroups($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/customer_groups' . $filter->toQuery(), "CustomerGroup");
+	}
+
+	/**
+	 * The number of customer groups in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getCustomerGroupsCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/customer_groups/count' . $filter->toQuery());
+	}
+
+	/**
 	 * Returns the collection of option sets.
 	 *
-	 * @param array $filter
+	 * @param mixed $filter
 	 * @return array
 	 */
 	public static function getOptionSets($filter=false)
@@ -885,6 +1244,40 @@ class Client
 	}
 
 	/**
+	 * Returns the collection of optionset options
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getOptionSetOptions($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/optionsets/options' . $filter->toQuery(), 'Option');
+	}
+
+	/**
+	 * The number of optionset options in the collection.
+	 *
+	 * @return int
+	 */
+	public static function getOptionSetOptionsCount()
+	{
+		$count = 0;
+		$page = 1;
+		$filter = Filter::create(array('page'=>$page, 'limit'=>250));
+		$data = self::getOptionSetOptions($filter);
+		$count = count($data);
+		while ($data) {
+			$page++;
+			$filter = Filter::create(array('page'=>$page, 'limit'=>250));
+			$data = self::getOptionSetOptions($filter);
+			$count += count($data);
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Status codes used to represent the state of an order.
 	 *
 	 * @return array
@@ -919,6 +1312,18 @@ class Client
 		return self::getCollection('/coupons' . $filter->toQuery(), 'Sku');
 	}
 
+	/**
+	 * The number of coupons in the collection.
+	 *
+	 * @param int $id customer id
+	 * @return array
+	 */
+	public static function getCouponsCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/coupons/count');
+	}
+
 	public static function createCoupon($object)
 	{
 		return self::createResource('/coupons', $object);
@@ -927,6 +1332,44 @@ class Client
 	public static function updateCoupon($id, $object)
 	{
 		return self::updateResource('/coupons/' . $id, $object);
+	}
+
+	public static function deleteCoupon($id)
+	{
+		return self::deleteResource('/coupons/' . $id);
+	}
+
+	public static function getCoupon($id)
+	{
+		return self::getResource('/coupons/' . $id, "Coupon");
+	}
+
+	public static function coupon() {
+		return new Bigcommerce_Api_Coupon();
+	}
+
+	/**
+	 * Returns the collection of redirects
+	 *
+	 * @param mixed $filter
+	 * @return array
+	 */
+	public static function getRedirects($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCollection('/redirects' . $filter->toQuery(), 'OptionSet');
+	}
+
+	/**
+	 * The total number of redirects in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 */
+	public static function getRedirectsCount($filter=false)
+	{
+		$filter = Filter::create($filter);
+		return self::getCount('/customer_groups/count');
 	}
 
 	/**
@@ -967,7 +1410,7 @@ class Client
 
 	/**
 	 * get list of webhooks
-	 * 
+	 *
 	 * @return 	array
 	 */
 	public static function getWebhooks()
@@ -1019,7 +1462,7 @@ class Client
 
 	/**
 	 * get list of blog posts
-	 * 
+	 *
 	 * @return 	array
 	 */
 	public static function getBlogPosts($filter=false)
@@ -1042,7 +1485,7 @@ class Client
 	/**
 	 * create blog post
 	 * @param 	stdClass 	$object 	post params
-	 * @return 	stdClass 	 	
+	 * @return 	stdClass
 	 */
 	public static function createBlogPost($object)
 	{
