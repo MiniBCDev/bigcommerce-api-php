@@ -65,6 +65,12 @@ class Connection
 	private $lastError = false;
 
 	/**
+     * Determines whether requests and responses should be treated
+     * as XML. Defaults to false (using JSON).
+     */
+    private $useXml = false;
+	
+	/**
 	 * Current cURL error code.
 	 */
 	private $errorCode;
