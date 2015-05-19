@@ -349,10 +349,15 @@ class Connection
 	 */
 	public function post($url, $body)
 	{
-		$this->addHeader('Content-Type', $this->getContentType());
+		$contentType = $this->getContentType();
+		$this->addHeader('Content-Type', $contentType);
 
 		if (!is_string($body)) {
-			$body = json_encode($body);
+			if ($contentType === self::MEDIA_TYPE_JSON) {
+				$body = json_encode($body);
+			} else {
+				$body = http_build_query($body, '', '&');
+			}
 		}
 
 		$this->initializeRequest();

@@ -346,7 +346,7 @@ class Client
 		// update with previously selected option
 		if (self::$cipher) $connection->setCipher(self::$cipher);
 		if (self::$verifyPeer) $connection->verifyPeer(self::$verifyPeer);
-
+		
 		return $connection->post(self::$login_url . '/oauth2/token', $context);
 	}
 
