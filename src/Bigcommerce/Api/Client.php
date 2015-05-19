@@ -22,6 +22,9 @@ class Client
 	static private $api_url = 'https://api.bigcommerce.com';
 	static private $login_url = 'https://login.bigcommerce.com';
 
+	static private $cipher;
+	static private $verifyPeer;
+
 	/**
 	 * Full URL path to the configured store API.
 	 *
@@ -129,6 +132,7 @@ class Client
 	 */
 	public static function verifyPeer($option=false)
 	{
+		self::$verifyPeer = $option;
 		self::connection()->verifyPeer($option);
 	}
 
@@ -137,6 +141,7 @@ class Client
 	 */
 	public static function setCipher($cipher='rsa_rc4_128_sha')
 	{
+		self::$cipher = $cipher;
 		self::connection()->setCipher($cipher);
 	}
 
@@ -337,6 +342,11 @@ class Client
 
 		$connection = new Connection();
 		$connection->useUrlencoded();
+		
+		// update with previously selected option
+		if (self::$cipher) $connection->setCipher(self::$cipher);
+		if (self::$verifyPeer) $connection->verifyPeer(self::$verifyPeer);
+
 		return $connection->post(self::$login_url . '/oauth2/token', $context);
 	}
 
