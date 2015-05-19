@@ -17,6 +17,7 @@ class Client
 	static private $path_prefix = '/api/v2';
 	static private $client_id;
 	static private $auth_token;
+	static private $store_hash;
 	static private $stores_prefix = '/stores/%s/v2';
 	static private $api_url = 'https://api.bigcommerce.com';
 	static private $login_url = 'https://login.bigcommerce.com';
