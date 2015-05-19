@@ -173,8 +173,8 @@ class Client
 		if (!self::$connection) {
 		 	self::$connection = new Connection();
 		 	if (self::$client_id) {
-		 		self::$connection->setHeader('X-Auth-Client', self::$client_id);
-		 		self::$connection->setHeader('X-Auth-Token', self::$auth_token);
+		 		self::$connection->addHeader('X-Auth-Client', self::$client_id);
+		 		self::$connection->addHeader('X-Auth-Token', self::$auth_token);
 		 	} else {
 		 		self::$connection->authenticate(self::$username, self::$api_key);
 		 	}
