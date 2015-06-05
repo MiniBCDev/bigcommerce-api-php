@@ -403,6 +403,8 @@ class Connection
 
 		$this->initializeRequest();
 
+		curl_setopt($this->curl, CURLOPT_POST, false);
+
 		$handle = tmpfile();
 		fwrite($handle, $body);
 		fseek($handle, 0);
@@ -424,6 +426,8 @@ class Connection
 	{
 		$this->initializeRequest();
 
+		curl_setopt($this->curl, CURLOPT_PUT, false);
+		curl_setopt($this->curl, CURLOPT_POST, false);
 		curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
 		curl_setopt($this->curl, CURLOPT_URL, $url);
 		curl_exec($this->curl);
