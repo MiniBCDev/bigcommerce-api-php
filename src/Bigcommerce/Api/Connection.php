@@ -362,6 +362,7 @@ class Connection
 
 		$this->initializeRequest();
 
+		curl_setopt($this->curl, CURLOPT_PUT, false);
 		curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'POST');
 		curl_setopt($this->curl, CURLOPT_URL, $url);
 		curl_setopt($this->curl, CURLOPT_POST, true);
