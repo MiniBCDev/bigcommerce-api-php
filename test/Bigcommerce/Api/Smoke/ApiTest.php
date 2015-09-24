@@ -17,7 +17,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 		    'api_key'   => getenv('TEST_STORE_API_KEY'),
 		));
 
-		Bigcommerce::setCipher('RC4-SHA');
+		Bigcommerce::setCipher('TLSv1');
 		Bigcommerce::failOnError(true);
 	}
 

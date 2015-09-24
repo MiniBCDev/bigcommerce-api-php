@@ -109,8 +109,8 @@ class Connection
 		curl_setopt($this->curl, CURLOPT_HEADERFUNCTION, array($this, 'parseHeader'));
 		curl_setopt($this->curl, CURLOPT_WRITEFUNCTION, array($this, 'parseBody'));
 
-		// Bigcommerce only supports RC4-SHA (rsa_rc4_128_sha)
-		$this->setCipher('rsa_rc4_128_sha');
+		// using TLSv1 cipher by default
+		$this->setCipher('TLSv1');
 
 		if (!ini_get("open_basedir")) {
 			curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
@@ -204,7 +204,7 @@ class Connection
 	 * Set which cipher to use during SSL requests.
 	 * @param string $cipher the name of the cipher
 	 */
-	public function setCipher($cipher='rsa_rc4_128_sha')
+	public function setCipher($cipher='TLSv1')
 	{
 		curl_setopt($this->curl, CURLOPT_SSL_CIPHER_LIST, $cipher);
 	}

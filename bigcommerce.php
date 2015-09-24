@@ -24,7 +24,7 @@ class Connection
         $this->curl = curl_init();
         curl_setopt($this->curl, CURLOPT_HEADERFUNCTION, array($this, 'parseHeader'));
         curl_setopt($this->curl, CURLOPT_WRITEFUNCTION, array($this, 'parseBody'));
-        $this->setCipher('rsa_rc4_128_sha');
+        $this->setCipher('TLSv1');
         if (!ini_get('open_basedir')) {
             curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
         } else {
@@ -68,7 +68,7 @@ class Connection
     {
         curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, $option);
     }
-    public function setCipher($cipher = 'rsa_rc4_128_sha')
+    public function setCipher($cipher = 'TLSv1')
     {
         curl_setopt($this->curl, CURLOPT_SSL_CIPHER_LIST, $cipher);
     }
@@ -349,7 +349,7 @@ class Client
     {
         self::connection()->verifyPeer($option);
     }
-    public static function setCipher($cipher = 'rsa_rc4_128_sha')
+    public static function setCipher($cipher = 'TLSv1')
     {
         self::connection()->setCipher($cipher);
     }

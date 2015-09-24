@@ -315,7 +315,7 @@ The client will set this cipher to be used by default.
 The setCipher method can be used to override this setting if required.
 
 ```
-Bigcommerce::setCipher('RC4-SHA');
+Bigcommerce::setCipher('TLSv1');
 ```
 
 Verifying SSL certificates

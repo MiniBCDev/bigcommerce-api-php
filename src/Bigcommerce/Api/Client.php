@@ -139,7 +139,7 @@ class Client
 	/**
 	 * Set which cipher to use during SSL requests.
 	 */
-	public static function setCipher($cipher='rsa_rc4_128_sha')
+	public static function setCipher($cipher='TLSv1')
 	{
 		self::$cipher = $cipher;
 		self::connection()->setCipher($cipher);
