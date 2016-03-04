@@ -128,6 +128,15 @@ class Client
 	}
 
 	/**
+     * Return JSON objects from the API instead of XML Strings.
+     * This is the default behavior.
+     */
+    public static function useJson()
+    {
+        self::connection()->useXml(false);
+    }
+
+	/**
 	 * Switch SSL certificate verification on requests.
 	 */
 	public static function verifyPeer($option=false)
@@ -178,8 +187,7 @@ class Client
 		if (!self::$connection) {
 		 	self::$connection = new Connection();
 		 	if (self::$client_id) {
-		 		self::$connection->addHeader('X-Auth-Client', self::$client_id);
-		 		self::$connection->addHeader('X-Auth-Token', self::$auth_token);
+		 		self::$connection->authenticateOauth(self::$client_id, self::$auth_token);
 		 	} else {
 		 		self::$connection->authenticate(self::$username, self::$api_key);
 		 	}
@@ -187,6 +195,25 @@ class Client
 
 		return self::$connection;
 	}
+
+	/**
+     * Convenience method to return instance of the connection
+     *
+     * @return Connection
+     */
+    public static function getConnection()
+    {
+        return self::connection();
+    }
+    /**
+     * Set the HTTP connection object. DANGER: This can screw up your Client!
+     *
+     * @param Connection $connection The connection to use
+     */
+    public static function setConnection(Connection $connection = null)
+    {
+        self::$connection = $connection;
+    }
 
 	/**
 	 * Get a collection result from the specified endpoint.

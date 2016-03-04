@@ -168,6 +168,18 @@ class Connection
 	}
 
 	/**
+     * Sets Oauth authentication headers
+     *
+     * @param string $clientId
+     * @param string $authToken
+     */
+    public function authenticateOauth($clientId, $authToken)
+    {
+        $this->addHeader('X-Auth-Client', $clientId);
+        $this->addHeader('X-Auth-Token', $authToken);
+    }
+
+	/**
 	 * Set a default timeout for the request. The client will error if the
 	 * request takes longer than this to respond.
 	 *
