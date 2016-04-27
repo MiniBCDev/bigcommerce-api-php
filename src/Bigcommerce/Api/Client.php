@@ -450,7 +450,7 @@ class Client
 	public static function getProductDiscountRules($filter=false)
 	{
 		$filter = Filter::create($filter);
-		return self::getCollection('/products/discountrule' . $filter->toQuery(), "ProductDiscountRule");
+		return self::getCollection('/products/discount_rules' . $filter->toQuery(), "ProductDiscountRule");
 	}
 
 	/**
@@ -462,7 +462,7 @@ class Client
 	public static function getProductDiscountRulesCount($filter=false)
 	{
 		$filter = Filter::create($filter);
-		return self::getCount('/products/discountrule/count' . $filter->toQuery());
+		return self::getCount('/products/discount_rules/count' . $filter->toQuery());
 	}
 
 	/**
