@@ -492,6 +492,40 @@ class Connection
 	}
 
 	/**
+	 * Callback methods collects header lines from the response.
+	 *
+	 * @param \stdClass $curl
+	 * @param string $headers
+	 * @return int
+	 */
+	private function parseHeader($curl, $headers)
+	{
+		if (!$this->responseStatusLine && strpos($headers, 'HTTP/') === 0) {
+			$this->responseStatusLine = $headers;
+		} else {
+			$parts = explode(': ', $headers);
+			if (isset($parts[1])) {
+				$this->responseHeaders[$parts[0]] = trim($parts[1]);
+			}
+		}
+
+		return strlen($headers);
+	}
+
+	/**
+	 * Callback method collects body content from the response.
+	 *
+	 * @param \stdClass $curl
+	 * @param string $body
+	 * @return int
+	 */
+	private function parseBody($curl, $body)
+	{
+		$this->responseBody .= $body;
+		return strlen($body);
+	}
+
+	/**
 	 * Access the status code of the response.
 	 * @return string
 	 */
