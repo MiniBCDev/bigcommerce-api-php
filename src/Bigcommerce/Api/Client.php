@@ -42,6 +42,7 @@ class Client
 	 * - api_key
 	 *
 	 * @param array $settings
+	 * @throws Exception
 	 */
 	public static function configureBasicAuth($settings)
 	{
@@ -57,6 +58,8 @@ class Client
 			throw new Exception("'api_key' must be provided");
 		}
 
+		self::$client_id = null;
+		self::$auth_token = null;
 		self::$username  = $settings['username'];
 		self::$api_key 	 = $settings['api_key'];
 		self::$store_url = rtrim($settings['store_url'], '/');
@@ -74,6 +77,7 @@ class Client
 	 * - store_hash
 	 *
 	 * @param array $settings
+	 * @throws Exception
 	 */
 	public static function configureOAuth($settings)
 	{
@@ -85,6 +89,8 @@ class Client
 			throw new Exception("'store_hash' must be provided");
 		}
 
+		self::$username  = null;
+		self::$api_key 	 = null;
 		self::$client_id = $settings['client_id'];
 		self::$auth_token = $settings['auth_token'];
 		self::$store_hash = $settings['store_hash'];
@@ -113,6 +119,8 @@ class Client
 	 * Configure the API client to throw exceptions when HTTP errors occur.
 	 *
 	 * Note that network faults will always cause an exception to be thrown.
+	 *
+	 * @param bool $option
 	 */
 	public static function failOnError($option=true)
 	{
@@ -128,16 +136,18 @@ class Client
 	}
 
 	/**
-     * Return JSON objects from the API instead of XML Strings.
-     * This is the default behavior.
-     */
-    public static function useJson()
-    {
-        self::connection()->useXml(false);
-    }
+	 * Return JSON objects from the API instead of XML Strings.
+	 * This is the default behavior.
+	 */
+	public static function useJson()
+	{
+		self::connection()->useXml(false);
+	}
 
 	/**
 	 * Switch SSL certificate verification on requests.
+	 *
+	 * @param bool $option
 	 */
 	public static function verifyPeer($option=false)
 	{
@@ -147,6 +157,8 @@ class Client
 
 	/**
 	 * Set which cipher to use during SSL requests.
+	 *
+	 * @param string $cipher
 	 */
 	public static function setCipher($cipher='TLSv1')
 	{
@@ -158,7 +170,7 @@ class Client
 	 * Connect to the internet through a proxy server.
 	 *
 	 * @param string $host host server
-	 * @param string $port port
+	 * @param string|bool $port port
 	 */
 	public static function useProxy($host, $port=false)
 	{
@@ -185,42 +197,42 @@ class Client
 	private static function connection()
 	{
 		if (!self::$connection) {
-		 	self::$connection = new Connection();
-		 	if (self::$client_id) {
-		 		self::$connection->authenticateOauth(self::$client_id, self::$auth_token);
-		 	} else {
-		 		self::$connection->authenticate(self::$username, self::$api_key);
-		 	}
+			self::$connection = new Connection();
+
+			if (self::$client_id) {
+				self::$connection->authenticateOauth(self::$client_id, self::$auth_token);
+			} else {
+				self::$connection->authenticate(self::$username, self::$api_key);
+			}
 		}
 
 		return self::$connection;
 	}
 
 	/**
-     * Convenience method to return instance of the connection
-     *
-     * @return Connection
-     */
-    public static function getConnection()
-    {
-        return self::connection();
-    }
-    /**
-     * Set the HTTP connection object. DANGER: This can screw up your Client!
-     *
-     * @param Connection $connection The connection to use
-     */
-    public static function setConnection(Connection $connection = null)
-    {
-        self::$connection = $connection;
-    }
+	 * Convenience method to return instance of the connection
+	 *
+	 * @return Connection
+	 */
+	public static function getConnection()
+	{
+		return self::connection();
+	}
+	/**
+	 * Set the HTTP connection object. DANGER: This can screw up your Client!
+	 *
+	 * @param Connection $connection The connection to use
+	 */
+	public static function setConnection(Connection $connection = null)
+	{
+		self::$connection = $connection;
+	}
 
 	/**
 	 * Get a collection result from the specified endpoint.
 	 *
 	 * @param string $path api endpoint
 	 * @param string $resource resource class to map individual items
-	 * @param array $fields additional key=>value properties to apply to the object
 	 * @return mixed array|string mapped collection or XML string if useXml is true
 	 */
 	public static function getCollection($path, $resource='Resource')
@@ -264,6 +276,7 @@ class Client
 	 *
 	 * @param string $path api endpoint
 	 * @param mixed $object object or XML string to create
+	 * @return mixed
 	 */
 	public static function createResource($path, $object)
 	{
@@ -277,6 +290,7 @@ class Client
 	 *
 	 * @param string $path api endpoint
 	 * @param mixed $object object or XML string to update
+	 * @return mixed
 	 */
 	public static function updateResource($path, $object)
 	{
@@ -289,6 +303,7 @@ class Client
 	 * Send a delete request to remove the specified resource.
 	 *
 	 * @param string $path api endpoint
+	 * @return mixed
 	 */
 	public static function deleteResource($path)
 	{
@@ -315,7 +330,7 @@ class Client
 	/**
 	 * Callback for mapping collection objects resource classes.
 	 *
-	 * @param stdClass $object
+	 * @param \stdClass $object
 	 * @return Resource
 	 */
 	private static function mapCollectionObject($object)
@@ -329,7 +344,7 @@ class Client
 	 * Map a single object to a resource class.
 	 *
 	 * @param string $resource name of the resource class
-	 * @param stdClass $object
+	 * @param \stdClass $object
 	 * @return Resource
 	 */
 	private static function mapResource($resource, $object)
@@ -345,7 +360,7 @@ class Client
 	/**
 	 * Map object representing a count to an integer value.
 	 *
-	 * @param stdClass $object
+	 * @param \stdClass $object
 	 * @return int
 	 */
 	private static function mapCount($object)
@@ -358,8 +373,8 @@ class Client
 	/**
 	 * Swaps a temporary access code for a long expiry auth token.
 	 *
-	 * @param stdClass $object
-	 * @return stdClasss
+	 * @param \stdClass $object
+	 * @return \stdClass
 	 */
 	public static function getAuthToken($object)
 	{
@@ -369,18 +384,18 @@ class Client
 
 		$connection = new Connection();
 		$connection->useUrlencoded();
-		
+
 		// update with previously selected option
 		if (self::$cipher) $connection->setCipher(self::$cipher);
 		if (self::$verifyPeer) $connection->verifyPeer(self::$verifyPeer);
-		
+
 		return $connection->post(self::$login_url . '/oauth2/token', $context);
 	}
 
 	/**
 	 * Pings the time endpoint to test the connection to a store.
 	 *
-	 * @return DateTime
+	 * @return \DateTime
 	 */
 	public static function getTime()
 	{
@@ -503,7 +518,7 @@ class Client
 	/**
 	 * Returns the collection of product options
 	 *
-	 * @param int id product ID
+	 * @param int $id product ID
 	 * @param mixed $filter
 	 * @return array
 	 */
@@ -540,7 +555,7 @@ class Client
 	/**
 	 * Returns the collection of product skus
 	 *
-	 * @param array $filter
+	 * @param array|bool $filter
 	 * @return array
 	 */
 	public static function getProductSkus($filter=false)
@@ -564,7 +579,7 @@ class Client
 	/**
 	 * Returns the collection of product videos
 	 *
-	 * @param array $filter
+	 * @param array|bool $filter
 	 * @return array
 	 */
 	public static function getProductVideos($filter=false)
@@ -593,31 +608,30 @@ class Client
 	 */
 	public static function getProductCustomFields($id)
 	{
-	    return self::getCollection('/products/' . $id . '/customfields/', 'ProductCustomField');
+		return self::getCollection('/products/' . $id . '/customfields/', 'ProductCustomField');
 	}
 
 	/**
 	 * Returns a single custom field by given id
 	 * @param  int $product_id product id
 	 * @param  int $id         custom field id
-	 * @return ProductCustomField|bool Returns ProductCustomField if exists, false if not exists
+	 * @return Resources\ProductCustomField|bool Returns ProductCustomField if exists, false if not exists
 	 */
 	public static function getProductCustomField($product_id, $id)
 	{
-	    return self::getResource('/products/' . $product_id . '/customfields/' . $id, 'ProductCustomField');
+		return self::getResource('/products/' . $product_id . '/customfields/' . $id, 'ProductCustomField');
 	}
 
 	/**
 	 * Create a new custom field for a given product.
 	 *
 	 * @param int $product_id product id
-	 * @param int $id custom field id
 	 * @param mixed $object fields to create
 	 * @return Object Object with `id`, `product_id`, `name` and `text` keys
 	 */
 	public static function createProductCustomField($product_id, $object)
 	{
-	    return self::createResource('/products/' . $product_id . '/customfields', $object);
+		return self::createResource('/products/' . $product_id . '/customfields', $object);
 	}
 
 	/**
@@ -626,10 +640,11 @@ class Client
 	 * @param int $product_id product id
 	 * @param int $id custom field id
 	 * @param mixed $object custom field to update
+	 * @return mixed
 	 */
 	public static function updateProductCustomField($product_id, $id, $object)
 	{
-	    return self::updateResource('/products/' . $product_id . '/customfields/' . $id, $object);
+		return self::updateResource('/products/' . $product_id . '/customfields/' . $id, $object);
 	}
 
 	/**
@@ -637,10 +652,11 @@ class Client
 	 *
 	 * @param int $product_id product id
 	 * @param int $id custom field id
+	 * @return mixed
 	 */
 	public static function deleteProductCustomField($product_id, $id)
 	{
-	    return self::deleteResource('/products/' . $product_id . '/customfields/' . $id);
+		return self::deleteResource('/products/' . $product_id . '/customfields/' . $id);
 	}
 
 	/**
@@ -671,7 +687,7 @@ class Client
 	 * Returns a single product resource by the given id.
 	 *
 	 * @param int $id product id
-	 * @return Product|string
+	 * @return Resources\Product|string
 	 */
 	public static function getProduct($id)
 	{
@@ -682,6 +698,7 @@ class Client
 	 * Create a new product.
 	 *
 	 * @param mixed $object fields to create
+	 * @return mixed
 	 */
 	public static function createProduct($object)
 	{
@@ -693,6 +710,7 @@ class Client
 	 *
 	 * @param int $id product id
 	 * @param mixed $object fields to update
+	 * @return mixed
 	 */
 	public static function updateProduct($id, $object)
 	{
@@ -703,6 +721,7 @@ class Client
 	 * Delete the given product.
 	 *
 	 * @param int $id product id
+	 * @return mixed
 	 */
 	public static function deleteProduct($id)
 	{
@@ -721,7 +740,12 @@ class Client
 		return self::getCollection('/options' . $filter->toQuery(), 'Option');
 	}
 
-	/** create options **/
+	/**
+	 * create options
+	 *
+	 * @param \stdClass $object
+	 * @return mixed
+	 */
 	public static function createOptions($object)
 	{
 		return self::createResource('/options', $object);
@@ -742,7 +766,7 @@ class Client
 	 * Return a single option by given id.
 	 *
 	 * @param int $id option id
-	 * @return Option
+	 * @return Resources\Option
 	 */
 	public static function getOption($id)
 	{
@@ -755,6 +779,7 @@ class Client
 	 * Delete the given option.
 	 *
 	 * @param int $id option id
+	 * @return mixed
 	 */
 	public static function deleteOption($id)
 	{
@@ -766,7 +791,7 @@ class Client
 	 *
 	 * @param int $option_id option id
 	 * @param int $id value id
-	 * @return OptionValue
+	 * @return Resources\OptionValue
 	 */
 	public static function getOptionValue($option_id, $id)
 	{
@@ -792,7 +817,6 @@ class Client
 	 */
 	public static function getOptionValuesCount()
 	{
-		$count = 0;
 		$page = 1;
 		$filter = Filter::create(array('page'=>$page, 'limit'=>250));
 
@@ -847,6 +871,7 @@ class Client
 	 * Create a new category from the given data.
 	 *
 	 * @param mixed $object
+	 * @return mixed
 	 */
 	public static function createCategory($object)
 	{
@@ -858,6 +883,7 @@ class Client
 	 *
 	 * @param int $id category id
 	 * @param mixed $object
+	 * @return mixed
 	 */
 	public static function updateCategory($id, $object)
 	{
@@ -868,6 +894,7 @@ class Client
 	 * Delete the given category.
 	 *
 	 * @param int $id category id
+	 * @return mixed
 	 */
 	public static function deleteCategory($id)
 	{
@@ -902,7 +929,7 @@ class Client
 	 * A single brand by given id.
 	 *
 	 * @param int $id brand id
-	 * @return Brand
+	 * @return Resources\Brand
 	 */
 	public static function getBrand($id)
 	{
@@ -913,6 +940,7 @@ class Client
 	 * Create a new brand from the given data.
 	 *
 	 * @param mixed $object
+	 * @return mixed
 	 */
 	public static function createBrand($object)
 	{
@@ -924,6 +952,7 @@ class Client
 	 *
 	 * @param int $id brand id
 	 * @param mixed $object
+	 * @return mixed
 	 */
 	public static function updateBrand($id, $object)
 	{
@@ -934,6 +963,7 @@ class Client
 	 * Delete the given brand.
 	 *
 	 * @param int $id brand id
+	 * @return mixed
 	 */
 	public static function deleteBrand($id)
 	{
@@ -966,7 +996,7 @@ class Client
 	 * A single order.
 	 *
 	 * @param int $id order id
-	 * @return Order
+	 * @return Resources\Order
 	 */
 	public static function getOrder($id)
 	{
@@ -978,6 +1008,7 @@ class Client
 	 * delete the order).
 	 *
 	 * @param int $id order id
+	 * @return mixed
 	 */
 	public static function deleteOrder($id)
 	{
@@ -985,9 +1016,11 @@ class Client
 	}
 
 	/**
-	* Create an order
-	**/
-
+	 * Create an order
+	 *
+	 * @param \stdClass $object
+	 * @return mixed
+	 **/
 	public static function createOrder($object)
 	{
 		return self::createResource('/orders', $object);
@@ -1013,7 +1046,6 @@ class Client
 	 */
 	public static function getOrderCouponsCount($filter=false)
 	{
-		$count = 0;
 		$page = 1;
 		$filter = Filter::create(array('page'=>$page, 'limit'=>250));
 		$data = self::getOrderCoupons($filter);
@@ -1138,7 +1170,7 @@ class Client
 	 * A single customer by given id.
 	 *
 	 * @param int $id customer id
-	 * @return Customer
+	 * @return Resources\Customer
 	 */
 	public static function getCustomer($id)
 	{
@@ -1149,6 +1181,7 @@ class Client
 	 * Create a new customer from the given data.
 	 *
 	 * @param mixed $object
+	 * @return mixed
 	 */
 	public static function createCustomer($object)
 	{
@@ -1160,6 +1193,7 @@ class Client
 	 *
 	 * @param int $id customer id
 	 * @param mixed $object
+	 * @return mixed
 	 */
 	public static function updateCustomer($id, $object)
 	{
@@ -1170,6 +1204,7 @@ class Client
 	 * Delete the given customer.
 	 *
 	 * @param int $id customer id
+	 * @return mixed
 	 */
 	public static function deleteCustomer($id)
 	{
@@ -1353,7 +1388,7 @@ class Client
 	/**
 	 * The number of coupons in the collection.
 	 *
-	 * @param int $id customer id
+	 * @param mixed $filter customer id
 	 * @return array
 	 */
 	public static function getCouponsCount($filter=false)
@@ -1383,7 +1418,7 @@ class Client
 	}
 
 	public static function coupon() {
-		return new Bigcommerce_Api_Coupon();
+		return new Resources\Coupon();
 	}
 
 	/**
@@ -1453,49 +1488,49 @@ class Client
 	 */
 	public static function getWebhooks()
 	{
-	    return self::getCollection('/hooks', 'Webhook');
+		return self::getCollection('/hooks', 'Webhook');
 	}
 
 	/**
 	 * get a specific webhook by id
 	 *
 	 * @params 	int 		$id 		webhook id
-	 * @return 	stdClass 	$object
+	 * @return 	\stdClass 	$object
 	 */
 	public static function getWebhook($id)
 	{
-	    return self::getResource('/hooks/' . $id, 'Webhook');
+		return self::getResource('/hooks/' . $id, 'Webhook');
 	}
 
 	/**
 	 * create webhook
-	 * @param 	stdClass 	$object 	webhook params
-	 * @return 	stdClass
+	 * @param 	\stdClass 	$object 	webhook params
+	 * @return 	\stdClass
 	 */
 	public static function createWebhook($object)
 	{
-	    return self::createResource('/hooks', $object);
+		return self::createResource('/hooks', $object);
 	}
 
 	/**
 	 * create a webhook
 	 * @param 	int 		$id 		webhook id
-	 * @param 	stdClass 	$object 	webhook params
-	 * @return 	stdClass
+	 * @param 	\stdClass 	$object 	webhook params
+	 * @return 	\stdClass
 	 */
 	public static function updateWebhook($id, $object)
 	{
-	    return self::updateResource('/hooks/' . $id, $object);
+		return self::updateResource('/hooks/' . $id, $object);
 	}
 
 	/**
 	 * delete a webhook
 	 * @param 	int 		$id 		webhook id
-	 * @return 	stdClass
+	 * @return 	\stdClass
 	 */
 	public static function deleteWebhook($id)
 	{
-	    return self::deleteResource('/hooks/' . $id);
+		return self::deleteResource('/hooks/' . $id);
 	}
 
 	/**
@@ -1506,48 +1541,48 @@ class Client
 	public static function getBlogPosts($filter=false)
 	{
 		$filter = Filter::create($filter);
-	    return self::getCollection('/blog/posts' . $filter->toQuery(), 'BlogPost');
+		return self::getCollection('/blog/posts' . $filter->toQuery(), 'BlogPost');
 	}
 
 	/**
 	 * get a specific blog post by id
 	 *
 	 * @params 	int 		$id 		post id
-	 * @return 	stdClass 	$object
+	 * @return 	\stdClass 	$object
 	 */
 	public static function getBlogPost($id)
 	{
-	    return self::getResource('/blog/posts/' . $id, 'BlogPost');
+		return self::getResource('/blog/posts/' . $id, 'BlogPost');
 	}
 
 	/**
 	 * create blog post
-	 * @param 	stdClass 	$object 	post params
-	 * @return 	stdClass
+	 * @param 	\stdClass 	$object 	post params
+	 * @return 	\stdClass
 	 */
 	public static function createBlogPost($object)
 	{
-	    return self::createResource('/blog/posts', $object);
+		return self::createResource('/blog/posts', $object);
 	}
 
 	/**
 	 * update blog post
 	 * @param 	int 		$id 		post id
-	 * @param 	stdClass 	$object 	post params
-	 * @return 	stdClass
+	 * @param 	\stdClass 	$object 	post params
+	 * @return 	\stdClass
 	 */
 	public static function updateBlogPost($id, $object)
 	{
-	    return self::updateResource('/blog/posts/' . $id, $object);
+		return self::updateResource('/blog/posts/' . $id, $object);
 	}
 
 	/**
 	 * delete a blog post
 	 * @param 	int 		$id 		post id
-	 * @return 	stdClass
+	 * @return 	\stdClass
 	 */
 	public static function deleteBlogPost($id)
 	{
-	    return self::deleteResource('/blog/posts/' . $id);
+		return self::deleteResource('/blog/posts/' . $id);
 	}
 }

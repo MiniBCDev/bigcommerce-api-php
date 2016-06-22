@@ -7,19 +7,18 @@ namespace Bigcommerce\Api;
  */
 class Connection
 {
-
 	/**
-	 * @var cURL resource
+	 * @var \stdClass cURL resource
 	 */
 	private $curl;
 
 	/**
-	 * @var hash of HTTP request headers
+	 * @var array hash of HTTP request headers
 	 */
 	private $headers = array();
 
 	/**
-	 * @var hash of headers from HTTP response
+	 * @var array hash of headers from HTTP response
 	 */
 	private $responseHeaders = array();
 
@@ -30,7 +29,7 @@ class Connection
 	private $responseStatusLine;
 
 	/**
-	 * @var hash of headers from HTTP response
+	 * @var string hash of headers from HTTP response
 	 */
 	private $responseBody;
 
@@ -65,15 +64,10 @@ class Connection
 	private $lastError = false;
 
 	/**
-     * Determines whether requests and responses should be treated
-     * as XML. Defaults to false (using JSON).
-     */
-    private $useXml = false;
-	
-	/**
-	 * Current cURL error code.
+	 * Determines whether requests and responses should be treated
+	 * as XML. Defaults to false (using JSON).
 	 */
-	private $errorCode;
+	private $useXml = false;
 
 	/**
 	 * Determines whether the response body should be returned as a raw string.
@@ -122,8 +116,11 @@ class Connection
 	/**
 	 * Controls whether requests and responses should be treated
 	 * as XML. Defaults to false (using JSON).
+	 *
+	 * @param bool $option
 	 */
-	public function useXml($option=true) {
+	public function useXml($option=true)
+	{
 		if ($option) {
 			$this->contentType = self::MEDIA_TYPE_XML;
 			$this->rawResponse = true;
@@ -133,6 +130,8 @@ class Connection
 	/**
 	 * Controls whether requests or responses should be treated
 	 * as urlencoded form data.
+	 *
+	 * @param bool $option
 	 */
 	public function useUrlencoded($option=true)
 	{
@@ -153,6 +152,8 @@ class Connection
 	 *
 	 * <p><em>Note that this doesn't use the builtin CURL_FAILONERROR option,
 	 * as this fails fast, making the HTTP body and headers inaccessible.</em></p>
+	 *
+	 * @param bool $option
 	 */
 	public function failOnError($option = true)
 	{
@@ -161,23 +162,31 @@ class Connection
 
 	/**
 	 * Sets the HTTP basic authentication.
+	 *
+	 * @param string $username
+	 * @param string $password
 	 */
 	public function authenticate($username, $password)
 	{
+		$this->removeHeader('X-Auth-Client');
+		$this->removeHeader('X-Auth-Token');
+
 		curl_setopt($this->curl, CURLOPT_USERPWD, "$username:$password");
 	}
 
 	/**
-     * Sets Oauth authentication headers
-     *
-     * @param string $clientId
-     * @param string $authToken
-     */
-    public function authenticateOauth($clientId, $authToken)
-    {
-        $this->addHeader('X-Auth-Client', $clientId);
-        $this->addHeader('X-Auth-Token', $authToken);
-    }
+	 * Sets Oauth authentication headers
+	 *
+	 * @param string $clientId
+	 * @param string $authToken
+	 */
+	public function authenticateOauth($clientId, $authToken)
+	{
+		$this->addHeader('X-Auth-Client', $clientId);
+		$this->addHeader('X-Auth-Token', $authToken);
+
+		curl_setopt($this->curl, CURLOPT_USERPWD, "");
+	}
 
 	/**
 	 * Set a default timeout for the request. The client will error if the
@@ -193,6 +202,9 @@ class Connection
 
 	/**
 	 * Set a proxy server for outgoing requests to tunnel through.
+	 *
+	 * @param string $server
+	 * @param bool|int $port
 	 */
 	public function useProxy($server, $port=false)
 	{
@@ -223,6 +235,9 @@ class Connection
 
 	/**
 	 * Add a custom header to the request.
+	 *
+	 * @param string $header
+	 * @param string $value
 	 */
 	public function addHeader($header, $value)
 	{
@@ -230,8 +245,20 @@ class Connection
 	}
 
 	/**
+	 * Removes a custom header from the request
+	 *
+	 * @param $header
+	 */
+	public function removeHeader($header)
+	{
+		if (isset($this->headers[$header])) {
+			unset($this->headers[$header]);
+		}
+	}
+
+	/**
 	 * Get the MIME type that should be used for this request.
-	 * 
+	 *
 	 * Defaults to JSON.
 	 */
 	private function getContentType()
@@ -245,7 +272,6 @@ class Connection
 	 */
 	private function initializeRequest()
 	{
-		$this->isComplete = false;
 		$this->responseBody = '';
 		$this->responseHeaders = array();
 		$this->lastError = false;
@@ -339,6 +365,10 @@ class Connection
 
 	/**
 	 * Make an HTTP GET request to the specified endpoint.
+	 *
+	 * @param string $url
+	 * @param bool|array $query
+	 * @return mixed
 	 */
 	public function get($url, $query=false)
 	{
@@ -358,6 +388,10 @@ class Connection
 
 	/**
 	 * Make an HTTP POST request to the specified endpoint.
+	 *
+	 * @param string $url
+	 * @param array $body
+	 * @return mixed
 	 */
 	public function post($url, $body)
 	{
@@ -386,6 +420,9 @@ class Connection
 
 	/**
 	 * Make an HTTP HEAD request to the specified endpoint.
+	 *
+	 * @param string $url
+	 * @return mixed
 	 */
 	public function head($url)
 	{
@@ -404,6 +441,10 @@ class Connection
 	 *
 	 * Requires a tmpfile() handle to be opened on the system, as the cURL
 	 * API requires it to send data.
+	 *
+	 * @param string $url
+	 * @param array $body
+	 * @return mixed
 	 */
 	public function put($url, $body)
 	{
@@ -433,6 +474,9 @@ class Connection
 
 	/**
 	 * Make an HTTP DELETE request to the specified endpoint.
+	 *
+	 * @param string $url
+	 * @return mixed
 	 */
 	public function delete($url)
 	{
@@ -448,32 +492,8 @@ class Connection
 	}
 
 	/**
-	 * Callback method collects body content from the response.
-	 */
-	private function parseBody($curl, $body)
-	{
-		$this->responseBody .= $body;
-		return strlen($body);
-	}
-
-	/**
-	 * Callback methods collects header lines from the response.
-	 */
-	private function parseHeader($curl, $headers)
-	{
-		if (!$this->responseStatusLine && strpos($headers, 'HTTP/') === 0) {
-			$this->responseStatusLine = $headers;
-		} else {
-			$parts = explode(': ', $headers);
-			if (isset($parts[1])) {
-				$this->responseHeaders[$parts[0]] = trim($parts[1]);
-			}
-		}
-        return strlen($headers);
-	}
-
-	/**
 	 * Access the status code of the response.
+	 * @return string
 	 */
 	public function getStatus()
 	{
@@ -482,6 +502,7 @@ class Connection
 
 	/**
 	 * Access the message string from the status line of the response.
+	 * @return string
 	 */
 	public function getStatusMessage()
 	{
@@ -498,12 +519,17 @@ class Connection
 
 	/**
 	 * Access given header from the response.
+	 *
+	 * @param string $header
+	 * @return string|bool
 	 */
 	public function getHeader($header)
 	{
 		if (array_key_exists($header, $this->responseHeaders)) {
 			return $this->responseHeaders[$header];
 		}
+
+		return false;
 	}
 
 	/**
