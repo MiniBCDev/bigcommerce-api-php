@@ -297,6 +297,10 @@ class Connection
 
 		if ($status >= 400 && $status <= 499) {
 			if ($this->failOnError) {
+				if (is_object($body) && property_exists($body, 'error')) {
+					throw new ClientError($body->error, $status);
+				}
+
 				throw new ClientError($body, $status);
 			} else {
 				$this->lastError = $body;
