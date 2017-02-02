@@ -326,6 +326,10 @@ class Client
 	{
 		if ($object == false || is_string($object)) return $object;
 
+		if (!is_array($object)) {
+			$object = array( $object );
+		}
+
 		$baseResource = __NAMESPACE__ . '\\' . $resource;
 		self::$resource = (class_exists($baseResource)) ?  $baseResource  :  'Bigcommerce\\Api\\Resources\\' . $resource;
 
