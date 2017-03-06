@@ -64,12 +64,6 @@ class Connection
 	private $lastError = false;
 
 	/**
-	 * Determines whether requests and responses should be treated
-	 * as XML. Defaults to false (using JSON).
-	 */
-	private $useXml = false;
-
-	/**
 	 * Determines whether the response body should be returned as a raw string.
 	 */
 	private $rawResponse = false;
@@ -99,18 +93,28 @@ class Connection
 	 */
 	public function __construct()
 	{
+		if (!defined('STDIN')) {
+			define('STDIN', fopen('php://stdin', 'r'));
+		}
+
 		$this->curl = curl_init();
 		curl_setopt($this->curl, CURLOPT_HEADERFUNCTION, array($this, 'parseHeader'));
 		curl_setopt($this->curl, CURLOPT_WRITEFUNCTION, array($this, 'parseBody'));
+
+		// Set to a blank string to make cURL include all encodings it can handle (gzip, deflate, identity) in the 'Accept-Encoding' request header and respect the 'Content-Encoding' response header
+		curl_setopt($this->curl, CURLOPT_ENCODING, '');
 
 		// using TLSv1 cipher by default
 		$this->setCipher('TLSv1');
 
 		if (!ini_get("open_basedir")) {
 			curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
+			curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
 		} else {
 			$this->followLocation = true;
 		}
+
+		$this->setTimeout(60);
 	}
 
 	/**
@@ -124,6 +128,9 @@ class Connection
 		if ($option) {
 			$this->contentType = self::MEDIA_TYPE_XML;
 			$this->rawResponse = true;
+		} else {
+			$this->contentType = self::MEDIA_TYPE_JSON;
+			$this->rawResponse = false;
 		}
 	}
 
@@ -291,7 +298,7 @@ class Connection
 			throw new NetworkError(curl_error($this->curl), curl_errno($this->curl));
 		}
 
-		$body = ($this->useXml) ? $this->getBody() : json_decode($this->getBody());
+		$body = ($this->rawResponse) ? $this->getBody() : json_decode($this->getBody());
 
 		$status = $this->getStatus();
 
@@ -384,6 +391,8 @@ class Connection
 
 		curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'GET');
 		curl_setopt($this->curl, CURLOPT_URL, $url);
+		curl_setopt($this->curl, CURLOPT_POST, false);
+		curl_setopt($this->curl, CURLOPT_PUT, false);
 		curl_setopt($this->curl, CURLOPT_HTTPGET, true);
 		curl_exec($this->curl);
 
@@ -412,10 +421,11 @@ class Connection
 
 		$this->initializeRequest();
 
-		curl_setopt($this->curl, CURLOPT_PUT, false);
 		curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'POST');
 		curl_setopt($this->curl, CURLOPT_URL, $url);
 		curl_setopt($this->curl, CURLOPT_POST, true);
+		curl_setopt($this->curl, CURLOPT_PUT, false);
+		curl_setopt($this->curl, CURLOPT_HTTPGET, false);
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $body);
 		curl_exec($this->curl);
 
@@ -460,8 +470,6 @@ class Connection
 
 		$this->initializeRequest();
 
-		curl_setopt($this->curl, CURLOPT_POST, false);
-
 		$handle = tmpfile();
 		fwrite($handle, $body);
 		fseek($handle, 0);
@@ -470,8 +478,13 @@ class Connection
 
 		curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'PUT');
 		curl_setopt($this->curl, CURLOPT_URL, $url);
+		curl_setopt($this->curl, CURLOPT_HTTPGET, false);
+		curl_setopt($this->curl, CURLOPT_POST, false);
 		curl_setopt($this->curl, CURLOPT_PUT, true);
 		curl_exec($this->curl);
+
+		fclose($handle);
+		curl_setopt($this->curl, CURLOPT_INFILE, STDIN);
 
 		return $this->handleResponse();
 	}
