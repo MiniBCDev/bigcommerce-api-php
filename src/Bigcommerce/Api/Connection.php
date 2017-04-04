@@ -522,7 +522,7 @@ class Connection
 		} else {
 			$parts = explode(': ', $headers);
 			if (isset($parts[1])) {
-				$this->responseHeaders[$parts[0]] = trim($parts[1]);
+				$this->responseHeaders[strtolower($parts[0])] = trim($parts[1]);
 			}
 		}
 
@@ -576,6 +576,8 @@ class Connection
 	 */
 	public function getHeader($header)
 	{
+		$header = strtolower($header);
+
 		if (array_key_exists($header, $this->responseHeaders)) {
 			return $this->responseHeaders[$header];
 		}
