@@ -1233,7 +1233,7 @@ class Client
 	public static function getOrderShipments($filter=false)
 	{
 		$filter = Filter::create($filter);
-		return self::getCount('/orders/shipments' . $filter->toQuery());
+		return self::getCollection('/orders/shipments' . $filter->toQuery());
 	}
 
 	/**
