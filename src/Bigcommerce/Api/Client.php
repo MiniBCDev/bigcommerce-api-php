@@ -20,9 +20,10 @@ class Client
 	static private $client_secret;
 	static private $auth_token;
 	static private $store_hash;
-	static private $stores_prefix = '/stores/%s/v2';
+	static private $stores_prefix = '/stores/%s/%s';
 	static private $api_url = 'https://api.bigcommerce.com';
 	static private $login_url = 'https://login.bigcommerce.com';
+	static private $version = 'v2';
 
 	static private $cipher;
 	static private $verifyPeer;
@@ -99,7 +100,7 @@ class Client
 
 		self::$client_secret = isset($settings['client_secret']) ? $settings['client_secret'] : null;
 
-		self::$api_path = self::$api_url . sprintf(self::$stores_prefix, self::$store_hash);
+		self::$api_path = self::$api_url . sprintf(self::$stores_prefix, self::$store_hash, self::$version);
 		self::$connection = false;
 	}
 
@@ -117,6 +118,20 @@ class Client
 			self::configureOAuth($settings);
 		} else {
 			self::configureBasicAuth($settings);
+		}
+	}
+
+	/**
+	 * Configure the API client with the Bigcommerce API version
+	 *
+	 * @param $version
+	 */
+	public static function setVersion($version)
+	{
+		self::$version = $version;
+
+		if (!empty(self::$client_id)) {
+			self::$api_path = self::$api_url . sprintf(self::$stores_prefix, self::$store_hash, self::$version);
 		}
 	}
 
@@ -925,15 +940,14 @@ class Client
 	}
 
 	/**
-	 * Return the collection of all option values.
+	 * Return the collection of all option values of a given option.
 	 *
-	 * @param mixed $filter
+	 * @param int $option_id
 	 * @return array
 	 */
-	public static function getOptionValues($filter=false)
+	public static function getOptionValues($option_id)
 	{
-		$filter = Filter::create($filter);
-		return self::getCollection('/options/values' . $filter->toQuery(), 'OptionValue');
+		return self::getCollection('/options/' . $option_id . '/values', 'OptionValue');
 	}
 
 	/**
