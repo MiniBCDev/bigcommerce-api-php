@@ -940,14 +940,15 @@ class Client
 	}
 
 	/**
-	 * Return the collection of all option values of a given option.
+	 * Return the collection of all option values.
 	 *
-	 * @param int $option_id
+	 * @param mixed $filter
 	 * @return array
 	 */
-	public static function getOptionValues($option_id)
+	public static function getOptionValues($filter=false)
 	{
-		return self::getCollection('/options/' . $option_id . '/values', 'OptionValue');
+		$filter = Filter::create($filter);
+		return self::getCollection('/options/values' . $filter->toQuery(), 'OptionValue');
 	}
 
 	/**
