@@ -74,6 +74,12 @@ class Connection
 	private $contentType;
 
 	/**
+	 * @var bool determines if another attempt should be made if the request
+	 * failed due to too many requests.
+	 */
+	private $autoRetry = true;
+
+	/**
 	 * XML media type.
 	 */
 	const MEDIA_TYPE_XML = 'application/xml';
@@ -196,6 +202,16 @@ class Connection
 	}
 
 	/**
+	 * Sets the auto retry parameter
+	 *
+	 * @param bool $retry
+	 */
+	public function setAutoRetry($retry = true)
+	{
+		$this->autoRetry = (bool)$retry;
+	}
+
+	/**
 	 * Set a default timeout for the request. The client will error if the
 	 * request takes longer than this to respond.
 	 *
@@ -291,6 +307,10 @@ class Connection
 	 *
 	 * If failOnError is true, a client or server error is raised, otherwise returns false
 	 * on error.
+	 *
+	 * @throws NetworkError
+	 * @throws ClientError
+	 * @throws ServerError
 	 */
 	private function handleResponse()
 	{
@@ -339,20 +359,22 @@ class Connection
 	}
 
 	/**
-	 * Recursively follow redirect until an OK response is recieved or
+	 * Recursively follow redirect until an OK response is received or
 	 * the maximum redirects limit is reached.
 	 *
 	 * Only 301 and 302 redirects are handled. Redirects from POST and PUT requests will
 	 * be converted into GET requests, as per the HTTP spec.
+	 *
+	 * @throws NetworkError
+	 * @throws ClientError
+	 * @throws ServerError
 	 */
 	private function followRedirectPath()
 	{
 		$this->redirectsFollowed++;
 
 		if ($this->getStatus() == 301 || $this->getStatus() == 302) {
-
 			if ($this->redirectsFollowed < $this->maxRedirects) {
-
 				$location = $this->getHeader('Location');
 				$forwardTo = parse_url($location);
 
@@ -364,7 +386,6 @@ class Connection
 				}
 
 				$this->get($url);
-
 			} else {
 				$errorString = "Too many redirects when trying to follow location.";
 				throw new NetworkError($errorString, CURLE_TOO_MANY_REDIRECTS);
@@ -380,23 +401,40 @@ class Connection
 	 * @param string $url
 	 * @param bool|array $query
 	 * @return mixed
+	 *
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public function get($url, $query=false)
 	{
 		$this->initializeRequest();
 
+		$requestUrl = $url;
+
 		if (is_array($query)) {
-			$url .= '?' . http_build_query($query);
+			$requestUrl .= '?' . http_build_query($query);
 		}
 
 		curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'GET');
-		curl_setopt($this->curl, CURLOPT_URL, $url);
+		curl_setopt($this->curl, CURLOPT_URL, $requestUrl);
 		curl_setopt($this->curl, CURLOPT_POST, false);
 		curl_setopt($this->curl, CURLOPT_PUT, false);
 		curl_setopt($this->curl, CURLOPT_HTTPGET, true);
 		curl_exec($this->curl);
 
-		return $this->handleResponse();
+		try {
+			return $this->handleResponse();
+		} catch (ClientError $ce) {
+			if ($this->canRetryRequest($ce)) {
+				$delay = (int)$this->getHeader('x-retry-after');
+				sleep($delay);
+
+				return $this->get($url, $query);
+			}
+
+			throw $ce;
+		}
 	}
 
 	/**
@@ -405,17 +443,23 @@ class Connection
 	 * @param string $url
 	 * @param array $body
 	 * @return mixed
+	 *
+	 * @throws ClientError
+	 * @throws ServerError
+	 * @throws NetworkError
 	 */
 	public function post($url, $body)
 	{
 		$contentType = $this->getContentType();
 		$this->addHeader('Content-Type', $contentType);
 
-		if (!is_string($body)) {
+		$postData = $body;
+
+		if (!is_string($postData)) {
 			if ($contentType === self::MEDIA_TYPE_JSON) {
-				$body = json_encode($body);
+				$postData = json_encode($postData);
 			} else {
-				$body = http_build_query($body, '', '&');
+				$postData = http_build_query($postData, '', '&');
 			}
 		}
 
@@ -426,10 +470,21 @@ class Connection
 		curl_setopt($this->curl, CURLOPT_POST, true);
 		curl_setopt($this->curl, CURLOPT_PUT, false);
 		curl_setopt($this->curl, CURLOPT_HTTPGET, false);
-		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $body);
+		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $postData);
 		curl_exec($this->curl);
 
-		return $this->handleResponse();
+		try {
+			return $this->handleResponse();
+		} catch (ClientError $ce) {
+			if ($this->canRetryRequest($ce)) {
+				$delay = (int)$this->getHeader('x-retry-after');
+				sleep($delay);
+
+				return $this->post($url, $body);
+			}
+
+			throw $ce;
+		}
 	}
 
 	/**
@@ -437,6 +492,10 @@ class Connection
 	 *
 	 * @param string $url
 	 * @return mixed
+	 *
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public function head($url)
 	{
@@ -447,7 +506,18 @@ class Connection
 		curl_setopt($this->curl, CURLOPT_NOBODY, true);
 		curl_exec($this->curl);
 
-		return $this->handleResponse();
+		try {
+			return $this->handleResponse();
+		} catch (ClientError $ce) {
+			if ($this->canRetryRequest($ce)) {
+				$delay = (int)$this->getHeader('x-retry-after');
+				sleep($delay);
+
+				return $this->head($url);
+			}
+
+			throw $ce;
+		}
 	}
 
 	/**
@@ -459,22 +529,28 @@ class Connection
 	 * @param string $url
 	 * @param array $body
 	 * @return mixed
+	 *
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public function put($url, $body)
 	{
 		$this->addHeader('Content-Type', $this->getContentType());
 
-		if (!is_string($body)) {
-			$body = json_encode($body);
+		$bodyData = $body;
+
+		if (!is_string($bodyData)) {
+			$bodyData = json_encode($bodyData);
 		}
 
 		$this->initializeRequest();
 
 		$handle = tmpfile();
-		fwrite($handle, $body);
+		fwrite($handle, $bodyData);
 		fseek($handle, 0);
 		curl_setopt($this->curl, CURLOPT_INFILE, $handle);
-		curl_setopt($this->curl, CURLOPT_INFILESIZE, strlen($body));
+		curl_setopt($this->curl, CURLOPT_INFILESIZE, strlen($bodyData));
 
 		curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'PUT');
 		curl_setopt($this->curl, CURLOPT_URL, $url);
@@ -486,7 +562,18 @@ class Connection
 		fclose($handle);
 		curl_setopt($this->curl, CURLOPT_INFILE, STDIN);
 
-		return $this->handleResponse();
+		try {
+			return $this->handleResponse();
+		} catch (ClientError $ce) {
+			if ($this->canRetryRequest($ce)) {
+				$delay = (int)$this->getHeader('x-retry-after');
+				sleep($delay);
+
+				return $this->put($url, $body);
+			}
+
+			throw $ce;
+		}
 	}
 
 	/**
@@ -494,6 +581,10 @@ class Connection
 	 *
 	 * @param string $url
 	 * @return mixed
+	 *
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public function delete($url)
 	{
@@ -505,7 +596,18 @@ class Connection
 		curl_setopt($this->curl, CURLOPT_URL, $url);
 		curl_exec($this->curl);
 
-		return $this->handleResponse();
+		try {
+			return $this->handleResponse();
+		} catch (ClientError $ce) {
+			if ($this->canRetryRequest($ce)) {
+				$delay = (int)$this->getHeader('x-retry-after');
+				sleep($delay);
+
+				return $this->delete($url);
+			}
+
+			throw $ce;
+		}
 	}
 
 	/**
@@ -540,6 +642,17 @@ class Connection
 	{
 		$this->responseBody .= $body;
 		return strlen($body);
+	}
+
+	/**
+	 * returns true if another attempt should be made on the request
+	 *
+	 * @param ClientError $ce
+	 * @return bool
+	 */
+	private function canRetryRequest(ClientError $ce)
+	{
+		return ($this->autoRetry && $ce->getCode() === 429);
 	}
 
 	/**

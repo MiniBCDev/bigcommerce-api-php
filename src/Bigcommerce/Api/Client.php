@@ -111,6 +111,7 @@ class Client
 	 * Accepts both OAuth and Basic Auth credentials
 	 *
 	 * @param array $settings
+	 * @throws \Exception
 	 */
 	public static function configure($settings)
 	{
@@ -145,6 +146,17 @@ class Client
 	public static function failOnError($option=true)
 	{
 		self::connection()->failOnError($option);
+	}
+
+	/**
+	 * Configure the API client to auto retry requests when it fails
+	 * due to too many requests.
+	 *
+	 * @param bool $retry
+	 */
+	public static function autoRetry($retry = true)
+	{
+		self::connection()->setAutoRetry($retry);
 	}
 
 	/**
@@ -254,6 +266,10 @@ class Client
 	 * @param string $path api endpoint
 	 * @param string $resource resource class to map individual items
 	 * @return mixed array|string mapped collection or XML string if useXml is true
+	 *
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCollection($path, $resource='Resource')
 	{
@@ -268,6 +284,9 @@ class Client
 	 * @param string $path api endpoint
 	 * @param string $resource resource class to map individual items
 	 * @return mixed Resource|string resource object or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getResource($path, $resource='Resource')
 	{
@@ -281,6 +300,9 @@ class Client
 	 *
 	 * @param string $path api endpoint
 	 * @return mixed int|string count value or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCount($path)
 	{
@@ -297,6 +319,10 @@ class Client
 	 * @param string $path api endpoint
 	 * @param mixed $object object or XML string to create
 	 * @return mixed
+	 *
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createResource($path, $object)
 	{
@@ -311,6 +337,10 @@ class Client
 	 * @param string $path api endpoint
 	 * @param mixed $object object or XML string to update
 	 * @return mixed
+	 *
+	 * @throws ClientError
+	 * @throws ServerError
+	 * @throws NetworkError
 	 */
 	public static function updateResource($path, $object)
 	{
@@ -324,6 +354,10 @@ class Client
 	 *
 	 * @param string $path api endpoint
 	 * @return mixed
+	 *
+	 * @throws ClientError
+	 * @throws ServerError
+	 * @throws NetworkError
 	 */
 	public static function deleteResource($path)
 	{
@@ -335,7 +369,7 @@ class Client
 	 *
 	 * @param string $resource name of the resource class
 	 * @param array $object object collection
-	 * @return array
+	 * @return array|string
 	 */
 	private static function mapCollection($resource, $object)
 	{
@@ -369,7 +403,7 @@ class Client
 	 *
 	 * @param string $resource name of the resource class
 	 * @param \stdClass $object
-	 * @return Resource
+	 * @return Resource|string
 	 */
 	private static function mapResource($resource, $object)
 	{
@@ -382,23 +416,13 @@ class Client
 	}
 
 	/**
-	 * Map object representing a count to an integer value.
-	 *
-	 * @param \stdClass $object
-	 * @return int
-	 */
-	private static function mapCount($object)
-	{
-		if ($object == false || is_string($object)) return $object;
-
-		return $object->count;
-	}
-
-	/**
 	 * Swaps a temporary access code for a long expiry auth token.
 	 *
 	 * @param \stdClass $object
 	 * @return \stdClass
+	 * @throws ClientError
+	 * @throws ServerError
+	 * @throws NetworkError
 	 */
 	public static function getAuthToken($object)
 	{
@@ -454,7 +478,10 @@ class Client
 	/**
 	 * Pings the time endpoint to test the connection to a store.
 	 *
-	 * @return \DateTime
+	 * @return \DateTime|string
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getTime()
 	{
@@ -470,6 +497,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProducts($filter=false)
 	{
@@ -482,6 +512,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return mixed int|string number of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductsCount($filter=false)
 	{
@@ -495,6 +528,9 @@ class Client
 	 * @param int $id product id
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductConfigurableFields($id, $filter=false)
 	{
@@ -508,6 +544,9 @@ class Client
 	 * @param int $id product id
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductConfigurableFieldsCount($id, $filter=false)
 	{
@@ -520,6 +559,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductDiscountRules($filter=false)
 	{
@@ -532,6 +574,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductDiscountRulesCount($filter=false)
 	{
@@ -545,6 +590,9 @@ class Client
 	 * @param string $productId
 	 * @param mixed $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createProductImage($productId, $object)
 	{
@@ -558,6 +606,9 @@ class Client
 	 * @param string $imageId
 	 * @param mixed $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateProductImage($productId, $imageId, $object)
 	{
@@ -570,6 +621,9 @@ class Client
 	 * @param int $productId
 	 * @param int $imageId
 	 * @return Resources\ProductImage|string
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductImage($productId, $imageId)
 	{
@@ -581,6 +635,9 @@ class Client
 	 *
 	 * @param int $id product id
 	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductImages($id)
 	{
@@ -593,6 +650,9 @@ class Client
 	 * @param int $productId
 	 * @param int $imageId
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteProductImage($productId, $imageId)
 	{
@@ -604,6 +664,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductsImages($filter=false)
 	{
@@ -616,6 +679,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductsImagesCount($filter=false)
 	{
@@ -628,6 +694,9 @@ class Client
 	 *
 	 * @param int $productId
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductOptions($productId)
 	{
@@ -640,6 +709,9 @@ class Client
 	 * @param int $productId
 	 * @param int $productOptionId
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductOption($productId, $productOptionId)
 	{
@@ -652,6 +724,9 @@ class Client
 	 * @param int $productId
 	 * @param int $productRuleId
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductRule($productId, $productRuleId)
 	{
@@ -663,6 +738,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductRules($filter=false)
 	{
@@ -675,6 +753,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductRulesCount($filter=false)
 	{
@@ -687,6 +768,9 @@ class Client
 	 *
 	 * @param array|bool $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductSkus($filter=false)
 	{
@@ -699,6 +783,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductSkusCount($filter=false)
 	{
@@ -711,6 +798,9 @@ class Client
 	 *
 	 * @param array|bool $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws ServerError
+	 * @throws NetworkError
 	 */
 	public static function getProductVideos($filter=false)
 	{
@@ -723,6 +813,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws ServerError
+	 * @throws NetworkError
 	 */
 	public static function getProductVideosCount($filter=false)
 	{
@@ -735,6 +828,9 @@ class Client
 	 *
 	 * @param int $id product ID
 	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws ServerError
+	 * @throws NetworkError
 	 */
 	public static function getProductCustomFields($id)
 	{
@@ -746,6 +842,9 @@ class Client
 	 * @param  int $product_id product id
 	 * @param  int $id         custom field id
 	 * @return Resources\ProductCustomField|bool Returns ProductCustomField if exists, false if not exists
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductCustomField($product_id, $id)
 	{
@@ -758,6 +857,9 @@ class Client
 	 * @param int $product_id product id
 	 * @param mixed $object fields to create
 	 * @return Object Object with `id`, `product_id`, `name` and `text` keys
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createProductCustomField($product_id, $object)
 	{
@@ -771,6 +873,9 @@ class Client
 	 * @param int $id custom field id
 	 * @param mixed $object custom field to update
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateProductCustomField($product_id, $id, $object)
 	{
@@ -783,6 +888,9 @@ class Client
 	 * @param int $product_id product id
 	 * @param int $id custom field id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteProductCustomField($product_id, $id)
 	{
@@ -794,6 +902,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductsCustomFields($filter=false)
 	{
@@ -806,6 +917,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductsCustomFieldsCount($filter=false)
 	{
@@ -818,6 +932,9 @@ class Client
 	 *
 	 * @param $id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProductReviews($id)
 	{
@@ -829,6 +946,9 @@ class Client
 	 *
 	 * @param int $id product id
 	 * @return Resources\Product|string
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getProduct($id)
 	{
@@ -840,6 +960,9 @@ class Client
 	 *
 	 * @param mixed $object fields to create
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createProduct($object)
 	{
@@ -852,6 +975,9 @@ class Client
 	 * @param int $id product id
 	 * @param mixed $object fields to update
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateProduct($id, $object)
 	{
@@ -863,6 +989,9 @@ class Client
 	 *
 	 * @param int $id product id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteProduct($id)
 	{
@@ -874,6 +1003,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptions($filter=false)
 	{
@@ -886,6 +1018,9 @@ class Client
 	 *
 	 * @param \stdClass $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createOptions($object)
 	{
@@ -897,6 +1032,9 @@ class Client
 	 * Return the number of options in the collection
 	 *
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptionsCount()
 	{
@@ -908,6 +1046,9 @@ class Client
 	 *
 	 * @param int $id option id
 	 * @return Resources\Option
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOption($id)
 	{
@@ -921,6 +1062,9 @@ class Client
 	 *
 	 * @param int $id option id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteOption($id)
 	{
@@ -933,6 +1077,9 @@ class Client
 	 * @param int $option_id option id
 	 * @param int $id value id
 	 * @return Resources\OptionValue
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptionValue($option_id, $id)
 	{
@@ -944,6 +1091,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptionValues($filter=false)
 	{
@@ -955,6 +1105,9 @@ class Client
 	 * The number of option values in the collection.
 	 *
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptionValuesCount()
 	{
@@ -978,6 +1131,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCategories($filter=false)
 	{
@@ -990,6 +1146,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCategoriesCount($filter=false)
 	{
@@ -1001,7 +1160,10 @@ class Client
 	 * A single category by given id.
 	 *
 	 * @param int $id category id
-	 * @return Category
+	 * @return Resources\Category
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCategory($id)
 	{
@@ -1013,6 +1175,9 @@ class Client
 	 *
 	 * @param mixed $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createCategory($object)
 	{
@@ -1025,6 +1190,9 @@ class Client
 	 * @param int $id category id
 	 * @param mixed $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateCategory($id, $object)
 	{
@@ -1036,6 +1204,9 @@ class Client
 	 *
 	 * @param int $id category id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteCategory($id)
 	{
@@ -1047,6 +1218,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getBrands($filter=false)
 	{
@@ -1059,6 +1233,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getBrandsCount($filter=false)
 	{
@@ -1071,6 +1248,9 @@ class Client
 	 *
 	 * @param int $id brand id
 	 * @return Resources\Brand
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getBrand($id)
 	{
@@ -1082,6 +1262,9 @@ class Client
 	 *
 	 * @param mixed $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createBrand($object)
 	{
@@ -1094,6 +1277,9 @@ class Client
 	 * @param int $id brand id
 	 * @param mixed $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateBrand($id, $object)
 	{
@@ -1105,6 +1291,9 @@ class Client
 	 *
 	 * @param int $id brand id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteBrand($id)
 	{
@@ -1116,6 +1305,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrders($filter=false)
 	{
@@ -1127,6 +1319,9 @@ class Client
 	 * The number of orders in the collection.
 	 *
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrdersCount()
 	{
@@ -1138,6 +1333,9 @@ class Client
 	 *
 	 * @param int $id order id
 	 * @return Resources\Order
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrder($id)
 	{
@@ -1150,6 +1348,9 @@ class Client
 	 *
 	 * @param int $id order id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteOrder($id)
 	{
@@ -1161,6 +1362,9 @@ class Client
 	 *
 	 * @param \stdClass $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 **/
 	public static function createOrder($object)
 	{
@@ -1172,6 +1376,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrderCoupons($filter=false)
 	{
@@ -1184,6 +1391,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrderCouponsCount($filter=false)
 	{
@@ -1206,6 +1416,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrderProducts($filter=false)
 	{
@@ -1218,6 +1431,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrderProductsCount($filter=false)
 	{
@@ -1230,6 +1446,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrderShipments($filter=false)
 	{
@@ -1242,6 +1461,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrderShipmentsCount($filter=false)
 	{
@@ -1254,6 +1476,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrderShippingAddresses($filter=false) {
 		$filter = Filter::create($filter);
@@ -1265,6 +1490,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrderShippingAddressesCount($filter=false) {
 		$filter = Filter::create($filter);
@@ -1276,6 +1504,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCustomers($filter=false)
 	{
@@ -1288,6 +1519,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCustomersCount($filter=false)
 	{
@@ -1300,6 +1534,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteCustomers($filter=false)
 	{
@@ -1312,6 +1549,9 @@ class Client
 	 *
 	 * @param int $id customer id
 	 * @return Resources\Customer
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCustomer($id)
 	{
@@ -1323,6 +1563,9 @@ class Client
 	 *
 	 * @param mixed $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createCustomer($object)
 	{
@@ -1335,6 +1578,9 @@ class Client
 	 * @param int $id customer id
 	 * @param mixed $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateCustomer($id, $object)
 	{
@@ -1346,6 +1592,9 @@ class Client
 	 *
 	 * @param int $id customer id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteCustomer($id)
 	{
@@ -1357,6 +1606,9 @@ class Client
 	 *
 	 * @param int $id customer id
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCustomerAddresses($id)
 	{
@@ -1368,6 +1620,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCustomersAddresses($filter=false)
 	{
@@ -1380,6 +1635,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCustomersAddressesCount($filter=false)
 	{
@@ -1392,6 +1650,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCustomerGroupsCount($filter=false)
 	{
@@ -1404,6 +1665,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptionSets($filter=false)
 	{
@@ -1428,6 +1692,9 @@ class Client
 	 * Returns the total number of option sets in the collection.
 	 *
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptionSetsCount()
 	{
@@ -1439,6 +1706,9 @@ class Client
 	 *
 	 * @param int $id option set id
 	 * @return Resources\OptionSet
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptionSet($id)
 	{
@@ -1450,6 +1720,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptionSetOptions($filter=false)
 	{
@@ -1461,10 +1734,12 @@ class Client
 	 * The number of optionset options in the collection.
 	 *
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOptionSetOptionsCount()
 	{
-		$count = 0;
 		$page = 1;
 		$filter = Filter::create(array('page'=>$page, 'limit'=>250));
 		$data = self::getOptionSetOptions($filter);
@@ -1484,6 +1759,9 @@ class Client
 	 * Status codes used to represent the state of an order.
 	 *
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getOrderStatuses()
 	{
@@ -1494,6 +1772,9 @@ class Client
 	 * Enabled shipping methods.
 	 *
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getShippingMethods()
 	{
@@ -1505,6 +1786,9 @@ class Client
 	 *
 	 * @param array $filter
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getSkus($filter = array())
 	{
@@ -1518,6 +1802,9 @@ class Client
 	 * @param $productId
 	 * @param $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createSku($productId, $object)
 	{
@@ -1530,6 +1817,9 @@ class Client
 	 * @param $id
 	 * @param $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateSku($id, $object)
 	{
@@ -1540,6 +1830,9 @@ class Client
 	 * Returns the total number of SKUs in the collection.
 	 *
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getSkusCount()
 	{
@@ -1551,6 +1844,9 @@ class Client
 	 *
 	 * @param int $id customer id
 	 * @return Resources\Coupon
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCoupon($id)
 	{
@@ -1562,6 +1858,9 @@ class Client
 	 *
 	 * @param array $filter
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCoupons($filter = array())
 	{
@@ -1574,6 +1873,9 @@ class Client
 	 *
 	 * @param $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createCoupon($object)
 	{
@@ -1586,6 +1888,9 @@ class Client
 	 * @param $id
 	 * @param $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateCoupon($id, $object)
 	{
@@ -1597,6 +1902,9 @@ class Client
 	 *
 	 * @param int $id coupon id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteCoupon($id)
 	{
@@ -1607,6 +1915,9 @@ class Client
 	 * Delete all Coupons.
 	 *
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteAllCoupons()
 	{
@@ -1617,6 +1928,9 @@ class Client
 	 * Return the number of coupons
 	 *
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCouponsCount()
 	{
@@ -1628,6 +1942,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getRedirects($filter=false)
 	{
@@ -1640,6 +1957,9 @@ class Client
 	 *
 	 * @param mixed $filter
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getRedirectsCount($filter=false)
 	{
@@ -1649,12 +1969,25 @@ class Client
 
 	/**
 	 * The request logs with usage history statistics.
+	 *
+	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getRequestLogs()
 	{
 		return self::getCollection('/requestlogs', 'RequestLog');
 	}
 
+	/**
+	 * Returns store details.
+	 *
+	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
 	public static function getStore()
 	{
 		$response = self::connection()->get(self::$api_path . '/store');
@@ -1667,6 +2000,9 @@ class Client
 	 * requests have been made, pings the time endpoint to get the value.
 	 *
 	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getRequestsRemaining()
 	{
@@ -1689,6 +2025,9 @@ class Client
 	 * @param $orderID
 	 * @param $shipmentID
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getShipment($orderID, $shipmentID)
 	{
@@ -1701,6 +2040,9 @@ class Client
 	 * @param $orderID
 	 * @param array $filter
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getShipments($orderID, $filter = array())
 	{
@@ -1714,6 +2056,9 @@ class Client
 	 * @param $orderID
 	 * @param $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createShipment($orderID, $object)
 	{
@@ -1727,6 +2072,9 @@ class Client
 	 * @param $shipmentID
 	 * @param $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateShipment($orderID, $shipmentID, $object)
 	{
@@ -1739,6 +2087,9 @@ class Client
 	 * @param $orderID
 	 * @param $shipmentID
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteShipment($orderID, $shipmentID)
 	{
@@ -1750,6 +2101,9 @@ class Client
 	 *
 	 * @param $orderID
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteAllShipmentsForOrder($orderID)
 	{
@@ -1761,6 +2115,9 @@ class Client
 	 *
 	 * @param mixed $object fields to create
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createCurrency($object)
 	{
@@ -1772,6 +2129,9 @@ class Client
 	 *
 	 * @param int $id currency id
 	 * @return Resources\Currency|string
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCurrency($id)
 	{
@@ -1784,6 +2144,9 @@ class Client
 	 * @param int $id currency id
 	 * @param mixed $object fields to update
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateCurrency($id, $object)
 	{
@@ -1795,6 +2158,9 @@ class Client
 	 *
 	 * @param int $id currency id
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteCurrency($id)
 	{
@@ -1806,6 +2172,9 @@ class Client
 	 *
 	 * @param array $filter
 	 * @return mixed array|string list of currencies or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCurrencies($filter = array())
 	{
@@ -1817,6 +2186,9 @@ class Client
 	 * get list of webhooks
 	 *
 	 * @return 	array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getWebhooks()
 	{
@@ -1828,6 +2200,9 @@ class Client
 	 *
 	 * @params 	int 		$id 		webhook id
 	 * @return 	\stdClass 	$object
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getWebhook($id)
 	{
@@ -1838,6 +2213,9 @@ class Client
 	 * create webhook
 	 * @param 	\stdClass 	$object 	webhook params
 	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createWebhook($object)
 	{
@@ -1849,6 +2227,9 @@ class Client
 	 * @param 	int 		$id 		webhook id
 	 * @param 	\stdClass 	$object 	webhook params
 	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateWebhook($id, $object)
 	{
@@ -1859,6 +2240,9 @@ class Client
 	 * delete a webhook
 	 * @param 	int 		$id 		webhook id
 	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteWebhook($id)
 	{
@@ -1869,6 +2253,9 @@ class Client
 	 * Get all content pages
 	 *
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getPages()
 	{
@@ -1880,6 +2267,9 @@ class Client
 	 *
 	 * @param int $pageId
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getPage($pageId)
 	{
@@ -1891,6 +2281,9 @@ class Client
 	 *
 	 * @param $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createPage($object)
 	{
@@ -1903,6 +2296,9 @@ class Client
 	 * @param int $pageId
 	 * @param $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updatePage($pageId, $object)
 	{
@@ -1914,6 +2310,9 @@ class Client
 	 *
 	 * @param int $pageId
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deletePage($pageId)
 	{
@@ -1925,6 +2324,9 @@ class Client
 	 *
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createGiftCertificate($object)
 	{
@@ -1936,6 +2338,9 @@ class Client
 	 *
 	 * @param int $giftCertificateId
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getGiftCertificate($giftCertificateId)
 	{
@@ -1947,6 +2352,9 @@ class Client
 	 *
 	 * @param array $filter
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getGiftCertificates($filter = array())
 	{
@@ -1960,6 +2368,9 @@ class Client
 	 * @param int $giftCertificateId
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateGiftCertificate($giftCertificateId, $object)
 	{
@@ -1971,6 +2382,9 @@ class Client
 	 *
 	 * @param int $giftCertificateId
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteGiftCertificate($giftCertificateId)
 	{
@@ -1981,6 +2395,9 @@ class Client
 	 * Delete all Gift Certificates
 	 *
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteAllGiftCertificates()
 	{
@@ -1993,6 +2410,9 @@ class Client
 	 * @param int $productId
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createProductReview($productId, $object)
 	{
@@ -2005,6 +2425,9 @@ class Client
 	 * @param string $productId
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createProductBulkPricingRules($productId, $object)
 	{
@@ -2016,6 +2439,9 @@ class Client
 	 *
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createMarketingBanner($object)
 	{
@@ -2026,6 +2452,9 @@ class Client
 	 * Get all Marketing Banners
 	 *
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getMarketingBanners()
 	{
@@ -2036,6 +2465,9 @@ class Client
 	 * Delete all Marketing Banners
 	 *
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteAllMarketingBanners()
 	{
@@ -2047,6 +2479,9 @@ class Client
 	 *
 	 * @param int $bannerID
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteMarketingBanner($bannerID)
 	{
@@ -2059,6 +2494,9 @@ class Client
 	 * @param int $bannerID
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateMarketingBanner($bannerID, $object)
 	{
@@ -2071,6 +2509,9 @@ class Client
 	 * @param int $customerID
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createCustomerAddress($customerID, $object)
 	{
@@ -2083,6 +2524,9 @@ class Client
 	 * @param int $productID
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createProductRule($productID, $object)
 	{
@@ -2094,6 +2538,9 @@ class Client
 	 *
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createCustomerGroup($object)
 	{
@@ -2104,6 +2551,9 @@ class Client
 	 * Get list of customer groups
 	 *
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getCustomerGroups()
 	{
@@ -2115,6 +2565,9 @@ class Client
 	 *
 	 * @param int $customerGroupId
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteCustomerGroup($customerGroupId)
 	{
@@ -2125,6 +2578,9 @@ class Client
 	 * Delete all customers
 	 *
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteAllCustomers()
 	{
@@ -2135,6 +2591,9 @@ class Client
 	 * Delete all options
 	 *
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteAllOptions()
 	{
@@ -2147,6 +2606,9 @@ class Client
 	 * @param int $optionId
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createOptionValue($optionId, $object)
 	{
@@ -2157,6 +2619,9 @@ class Client
 	 * Delete all option sets that were created.
 	 *
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteAllOptionSets()
 	{
@@ -2170,6 +2635,9 @@ class Client
 	 * @param int $optionValueId
 	 * @param array $object
 	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateOptionValue($optionId, $optionValueId, $object)
 	{
@@ -2182,7 +2650,11 @@ class Client
 	/**
 	 * get list of blog posts
 	 *
+	 * @param mixed $filter
 	 * @return 	array
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getBlogPosts($filter=false)
 	{
@@ -2193,8 +2665,11 @@ class Client
 	/**
 	 * get a specific blog post by id
 	 *
-	 * @params 	int 		$id 		post id
+	 * @param 	int 		$id 		post id
 	 * @return 	\stdClass 	$object
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function getBlogPost($id)
 	{
@@ -2205,6 +2680,9 @@ class Client
 	 * create blog post
 	 * @param 	\stdClass 	$object 	post params
 	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function createBlogPost($object)
 	{
@@ -2216,6 +2694,9 @@ class Client
 	 * @param 	int 		$id 		post id
 	 * @param 	\stdClass 	$object 	post params
 	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function updateBlogPost($id, $object)
 	{
@@ -2226,6 +2707,9 @@ class Client
 	 * delete a blog post
 	 * @param 	int 		$id 		post id
 	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
 	 */
 	public static function deleteBlogPost($id)
 	{
