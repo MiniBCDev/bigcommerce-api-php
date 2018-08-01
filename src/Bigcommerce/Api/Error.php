@@ -14,6 +14,12 @@ class Error extends \Exception
 			$message = $message[0]->message;
 		}
 
+		if (is_object($message)) {
+			if (property_exists($message, 'title')) {
+				$message = $message->title;
+			}
+		}
+		
 		parent::__construct($message, $code);
 	}
 
