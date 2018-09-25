@@ -2715,4 +2715,534 @@ class Client
 	{
 		return self::deleteResource('/blog/posts/' . $id);
 	}
+    
+    /**
+     * Get v3 resource
+     * @param $path   path of resource
+	 * @return mixed Resource|string resource object or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+     */
+    public static function getV3Resource($path) {
+        self::setVersion('v3');
+		$ret = self::getResource($path);
+        self::setVersion('v2');
+        return $ret;
+    }
+
+	/**
+	 * create catalog
+     * @param   String      $catalogPath    path of request
+	 * @param 	\stdClass 	$object 	    catalog params
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function createCatalog($catalogPath, $object)
+	{
+        self::setVersion('v3');
+        $ret = self::createResource('/catalog' . $catalogPath, $object);
+        self::setVersion('v2');
+        return $ret;
+    }
+
+	/**
+	 * get a specific catalog by id
+	 *
+     * @param String $catalogPath   api endpoint
+	 * @param int    $id            id of catalog item
+	 * @return 	\stdClass 	$object
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalog($catalogPath)
+	{
+        return self::getV3Resource('/catalog' . $catalogPath);
+    }
+    
+	/**
+	 * Returns the default collection of products.
+	 *
+     * @param String $catalogPath api endpoint
+	 * @param mixed $filter
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+    public static function getCatalogs($catalogPath, $filter=false)
+	{
+		$filter = Filter::create($filter);
+        return self::getV3Resource('/catalog' . $catalogPath . $filter->toQuery());
+    }
+
+	/**
+	 * update catalog
+	 * @param 	int 		$id 		id of catalog item
+	 * @param 	\stdClass 	$object 	catalog params
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function updateCatalog($catalogPath, $object)
+	{
+        self::setVersion('v3');
+        $ret = self::updateResource('/catalog' . $catalogPath, $object);
+        self::setVersion('v2');
+        
+        return $ret;
+    }
+
+	/**
+	 * delete catalog
+	 * @param 	int 		$id 		id of catalog item
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function deleteCatalog($catalogPath)
+	{
+        self::setVersion('v3');
+		$ret = self::deleteResource('/catalog' . $catalogPath);
+        self::setVersion('v2');
+
+        return $ret;
+	}
+
+	/**
+	 * Create a new catalog product.
+	 *
+	 * @param mixed $object fields to create
+	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function createCatalogProduct($object)
+	{
+		return self::createCatalog('/products', $object);
+	}
+
+	/**
+	 * Get single catalog product.
+	 *
+	 * @param int $id catalog product id
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProduct($id)
+	{
+		return self::getCatalogs('/products/' . $id);
+    }
+    
+	/**
+	 * Returns the default collection of catalog products.
+	 *
+	 * @param mixed $filter
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProducts($filter=false)
+	{
+		return self::getCatalogs('/products', $filter);
+    }
+
+	/**
+	 * update catalog product
+	 * @param 	int 		$id 		catalog product id
+	 * @param 	\stdClass 	$object 	catalog product params
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function updateCatalogProduct($id, $object)
+	{
+		return self::updateCatalog('/products/' . $id, $object);
+	}
+
+	/**
+	 * delete a catalog product
+     * @param int $id       product id
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function deleteCatalogProduct($id)
+	{
+		return self::deleteCatalog('/products/' . $id);
+	}
+
+	/**
+	 * Create a new catalog brand.
+	 *
+	 * @param mixed $object fields to create
+	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function createCatalogBrand($object)
+	{
+		return self::createCatalog('/brands', $object);
+	}
+
+	/**
+	 * Get single catalog brand.
+	 *
+	 * @param int $id catalog brand id
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogBrand($id)
+	{
+		return self::getCatalogs('/brands/' . $id);
+    }
+    
+	/**
+	 * Returns the default collection of catalog brands.
+	 *
+	 * @param mixed $filter
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogBrands($filter=false)
+	{
+		return self::getCatalogs('/brands', $filter);
+	}
+
+	/**
+	 * update catalog brand
+	 * @param 	int 		$id 		catalog brand id
+	 * @param 	\stdClass 	$object 	catalog brand params
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function updateCatalogBrand($id, $object)
+	{
+		return self::updateCatalog('/brands/' . $id, $object);
+	}
+
+	/**
+	 * delete a catalog brand
+     * @param int $id       brand id
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function deleteCatalogBrand($id)
+	{
+		return self::deleteCatalog('/brands/' . $id);
+	}
+
+	/**
+	 * Create a new catalog product meta field.
+	 *
+     * @param int $id product id
+	 * @param mixed $object fields to create
+	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function createCatalogProductMetaFields($id, $object)
+	{
+		return self::createCatalog('/products/' . $id . '/metafields', $object);
+    }
+    
+	/**
+	 * Returns catalog product meta field.
+	 *
+     * @param int $id product id
+	 * @param mixed $filter
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProductMetaFields($id, $filter=false)
+	{
+		return self::getCatalogs('/products/' . $id . '/metafields', $filter);
+	}
+    
+	/**
+	 * Get single catalog product meta field.
+	 *
+     * @param int $product_id product id
+     * @param int $id product meta field id
+	 * @param mixed $filter
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProductMetaField($product_id, $id)
+	{
+		return self::getCatalogs('/products/' . $product_id . '/metafields/' . $id);
+	}
+
+	/**
+	 * update catalog product metafield
+     * @param   int         $product_id product id
+	 * @param 	int 		$id 		metafield id
+	 * @param 	\stdClass 	$object 	metafield params
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function updateCatalogProductMetaField($product_id, $id, $object)
+	{
+		return self::updateCatalog('/products/' . $product_id . '/metafields/' . $id, $object);
+	}
+
+	/**
+	 * delete a catalog product meta field
+     * @param int $product_id       product id
+	 * @param int $id 	metafield id
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function deleteCatalogProductMetaField($product_id, $id)
+	{
+		return self::deleteCatalog('/products/' . $product_id . '/metafields/' . $id);
+	}
+
+	/**
+	 * Create a new catalog product image.
+	 *
+     * @param int $id product id
+	 * @param mixed $object fields to create
+	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function createCatalogProductImage($id, $object)
+	{
+		return self::createCatalog('/products/' . $id . '/images', $object);
+	}
+
+	/**
+	 * Get single catalog product image.
+	 *
+	 * @param int $product_id catalog product id
+	 * @param int $id catalog product image id
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProductImage($product_id, $id)
+	{
+		return self::getCatalogs('/products/' . $product_id . '/iamges/' . $id);
+	}
+
+	/**
+	 * Returns the default collection of catalog product images.
+	 *
+	 * @param int $id catalog product id
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProductImages($id, $filter=false)
+	{
+		return self::getCatalogs('/products/' . $id . '/images', $filter);
+	}
+
+	/**
+	 * update catalog product image
+     * @param   int         $product_id product id
+	 * @param 	int 		$id 		image id
+	 * @param 	\stdClass 	$object 	image params
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function updateCatalogProductImage($product_id, $id, $object)
+	{
+		return self::updateCatalog('/products/' . $product_id . '/images/' . $id, $object);
+	}
+
+	/**
+	 * delete a catalog product image
+     * @param int $product_id       catalog product id
+	 * @param int $id 	        image id
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function deleteCatalogProductImage($product_id, $id)
+	{
+		return self::deleteCatalog('/products/' . $product_id . '/images/' . $id);
+    }
+
+	/**
+	 * Create a new catalog product custom field.
+	 *
+     * @param int $id product id
+	 * @param mixed $object fields to create
+	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function createCatalogProductCustomField($id, $object)
+	{
+		return self::createCatalog('/products/' . $id . '/custom-fields', $object);
+	}
+
+	/**
+	 * Get single catalog product custom field.
+	 *
+	 * @param int $product_id catalog product id
+	 * @param int $id catalog product custom field id
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProductCustomField($product_id, $id)
+	{
+		return self::getCatalogs('/products/' . $product_id . '/custom-fields/' . $id);
+	}
+
+	/**
+	 * Returns the default collection of catalog product custom fields.
+	 *
+	 * @param int $id catalog product id
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProductCustomFields($id, $filter=false)
+	{
+		return self::getCatalogs('/products/' . $id . '/custom-fields', $filter);
+	}
+
+	/**
+	 * update catalog product custom field
+     * @param   int         $product_id product id
+	 * @param 	int 		$id 		custom field id
+	 * @param 	\stdClass 	$object 	custom field params
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function updateCatalogProductCustomField($product_id, $id, $object)
+	{
+		return self::updateCatalog('/products/' . $product_id . '/custom-fields/' . $id, $object);
+	}
+
+	/**
+	 * delete a catalog product custom field
+     * @param int $product_id       catalog product id
+	 * @param int $id 	            custom field id
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function deleteCatalogProductCustomField($product_id, $id)
+	{
+		return self::deleteCatalog('/products/' . $product_id . '/custom-fields/' . $id);
+    }
+
+	/**
+	 * Create a new catalog product bulk pricing rule.
+	 *
+     * @param int $id product id
+	 * @param mixed $object fields to create
+	 * @return mixed
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function createCatalogProductBulkPricingRule($id, $object)
+	{
+		return self::createCatalog('/products/' . $id . '/bulk-pricing-rules', $object);
+	}
+
+	/**
+	 * Get single catalog product bulk pricing rule.
+	 *
+	 * @param int $product_id catalog product id
+	 * @param int $id catalog product bulk pricing rule id
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProductBulkPricingRule($product_id, $id)
+	{
+		return self::getCatalogs('/products/' . $product_id . '/bulk-pricing-rules/' . $id);
+	}
+
+	/**
+	 * Returns the default collection of catalog product bulk pricing rules.
+	 *
+	 * @param int $id catalog product id
+	 * @return mixed array|string list of products or XML string if useXml is true
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCatalogProductBulkPricingRules($id, $filter=false)
+	{
+		return self::getCatalogs('/products/' . $id . '/bulk-pricing-rules', $filter);
+	}
+
+	/**
+	 * update catalog product bulk pricing rules
+     * @param   int         $product_id product id
+	 * @param 	int 		$id 		bulk pricing rules id
+	 * @param 	\stdClass 	$object 	bulk pricing rules params
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function updateCatalogProductBulkPricingRule($product_id, $id, $object)
+	{
+		return self::updateCatalog('/products/' . $product_id . '/bulk-pricing-rules/' . $id, $object);
+	}
+
+	/**
+	 * delete a catalog product bulk pricing rule
+     * @param int $product_id       catalog product id
+	 * @param int $id 	            bulk pricing rule id
+	 * @return 	\stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function deleteCatalogProductBulkPricingRule($product_id, $id)
+	{
+		return self::deleteCatalog('/products/' . $product_id . '/bulk-pricing-rules/' . $id);
+    }
 }
