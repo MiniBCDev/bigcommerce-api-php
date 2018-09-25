@@ -2730,6 +2730,24 @@ class Client
         self::setVersion('v2');
         return $ret;
     }
+    
+	/**
+	 * Send a v3 delete api request
+	 *
+	 * @param string $path api endpoint
+	 * @return mixed
+	 *
+	 * @throws ClientError
+	 * @throws ServerError
+	 * @throws NetworkError
+	 */
+	public static function deleteV3Resource($path)
+	{
+        self::setVersion('v3');
+		$ret = self::deleteResource($path);
+        self::setVersion('v2');
+        return $ret;
+	}
 
 	/**
 	 * create catalog
@@ -2807,11 +2825,7 @@ class Client
 	 */
 	public static function deleteCatalog($catalogPath)
 	{
-        self::setVersion('v3');
-		$ret = self::deleteResource('/catalog' . $catalogPath);
-        self::setVersion('v2');
-
-        return $ret;
+        return self::deleteV3Resource('/catalog' . $catalogPath);
 	}
 
 	/**
@@ -3054,7 +3068,7 @@ class Client
 	 */
 	public static function getCatalogProductImage($product_id, $id)
 	{
-		return self::getCatalogs('/products/' . $product_id . '/iamges/' . $id);
+		return self::getCatalogs('/products/' . $product_id . '/images/' . $id);
 	}
 
 	/**
