@@ -2742,7 +2742,7 @@ class Client
 	 * @throws NetworkError
 	 */
 	public static function deleteV3Resource($path)
-	{
+	{        
         self::setVersion('v3');
 		$ret = self::deleteResource($path);
         self::setVersion('v2');
@@ -2896,6 +2896,25 @@ class Client
 	{
 		return self::deleteCatalog('/products/' . $id);
 	}
+    
+	/**
+	 * delete catalog products by filter.
+	 *
+	 * @param mixed $filter
+	 * @return boolean when filter is false | \stdClass
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function deleteCatalogProducts($filter=false)
+	{
+        if ($filter === false) {
+            return false;
+        }
+
+        $filter = Filter::create($filter);
+		return self::deleteCatalog('/products' . $filter->toQuery());
+    }
 
 	/**
 	 * Create a new catalog brand.
