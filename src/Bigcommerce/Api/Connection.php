@@ -427,8 +427,8 @@ class Connection
 			return $this->handleResponse();
 		} catch (ClientError $ce) {
 			if ($this->canRetryRequest($ce)) {
-				$delay = (int)$this->getHeader('x-retry-after');
-				sleep($delay);
+				$delayMs = (int)$this->getHeader('X-Rate-Limit-Time-Reset-Ms');
+				usleep($delayMs * 1000);
 
 				return $this->get($url, $query);
 			}
@@ -477,8 +477,8 @@ class Connection
 			return $this->handleResponse();
 		} catch (ClientError $ce) {
 			if ($this->canRetryRequest($ce)) {
-				$delay = (int)$this->getHeader('x-retry-after');
-				sleep($delay);
+				$delayMs = (int)$this->getHeader('X-Rate-Limit-Time-Reset-Ms');
+				usleep($delayMs * 1000);
 
 				return $this->post($url, $body);
 			}
@@ -566,8 +566,8 @@ class Connection
 			return $this->handleResponse();
 		} catch (ClientError $ce) {
 			if ($this->canRetryRequest($ce)) {
-				$delay = (int)$this->getHeader('x-retry-after');
-				sleep($delay);
+				$delayMs = (int)$this->getHeader('X-Rate-Limit-Time-Reset-Ms');
+				usleep($delayMs * 1000);
 
 				return $this->put($url, $body);
 			}
@@ -600,8 +600,8 @@ class Connection
 			return $this->handleResponse();
 		} catch (ClientError $ce) {
 			if ($this->canRetryRequest($ce)) {
-				$delay = (int)$this->getHeader('x-retry-after');
-				sleep($delay);
+				$delayMs = (int)$this->getHeader('X-Rate-Limit-Time-Reset-Ms');
+				usleep($delayMs * 1000);
 
 				return $this->delete($url);
 			}
