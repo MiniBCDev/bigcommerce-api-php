@@ -1530,6 +1530,88 @@ class Client
 	}
 
 	/**
+	 * The total number of customers in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCustomerAttributes($filter=false, $isDataOnly=false)
+	{
+		$filter = Filter::create($filter);
+		$response = self::getV3Resource('/customers/attributes' . $filter->toQuery());
+		if ($isDataOnly) {
+			if ($response !== false && !empty($response->data)) {
+				return self::mapCollection('Resource', $response->data);
+			}
+		}
+
+		return $response;
+	}
+
+	/**
+	 * The total number of customers in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCustomerAttributeValues($filter=false, $isDataOnly=false)
+	{
+		$filter = Filter::create($filter);
+		$response = self::getV3Resource('/customers/attribute-values' . $filter->toQuery());
+		if ($isDataOnly) {
+			if ($response !== false && !empty($response->data)) {
+				return self::mapCollection('Resource', $response->data);
+			}
+		}
+
+		return $response;
+	}
+
+	/**
+	 * The total number of customer Attributes.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCustomerAttributesCount($filter=false)
+	{
+		$ret = self::getCustomerAttributes($filter);
+		if ($ret !== false && !empty($ret->meta) && !empty($ret->meta->pagination) && !empty($ret->meta->pagination->total_pages)) {
+			return $ret->meta->pagination->total_pages;
+		}
+		
+		return false;
+	}
+
+	/**
+	 * The total number of customers in the collection.
+	 *
+	 * @param mixed $filter
+	 * @return int
+	 * @throws ClientError
+	 * @throws NetworkError
+	 * @throws ServerError
+	 */
+	public static function getCustomerAttributeValuesCount($filter=false)
+	{
+		$ret = self::getCustomerAttributeValues($filter);
+		if ($ret !== false && !empty($ret->meta) && !empty($ret->meta->pagination) && !empty($ret->meta->pagination->total_pages)) {
+			return $ret->meta->pagination->total_pages;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Bulk delete customers.
 	 *
 	 * @param mixed $filter
