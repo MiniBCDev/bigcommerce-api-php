@@ -18,6 +18,13 @@ class Error extends \Exception
 			if (property_exists($message, 'title')) {
 				$message = $message->title;
 			}
+			
+			if (property_exists($message, 'errors')) {
+				$errors = (array)$message->errors;
+				$error = array_shift($errors);
+
+				$message = $error;
+			}
 		}
 		
 		parent::__construct($message, $code);
