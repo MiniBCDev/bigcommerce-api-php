@@ -79,6 +79,14 @@ class Connection
 	 */
 	private $autoRetry = true;
 
+	/** @var int current count of retry attempts */
+	private $retryAttempts = 0;
+
+	/**
+	 * Maximum number of retries for a request before reporting a failure.
+	 */
+	const MAX_RETRY = 5;
+
 	/**
 	 * XML media type.
 	 */
@@ -342,6 +350,9 @@ class Connection
 			}
 		}
 
+		// reset retry attempts on a successful request
+		$this->retryAttempts = 0;
+
 		if ($this->followLocation) {
 			$this->followRedirectPath();
 		}
@@ -434,6 +445,15 @@ class Connection
 			}
 
 			throw $ce;
+		} catch (NetworkError $ne) {
+			if ($this->canRetryError($ne)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->delete($url);
+			}
+
+			throw $ne;
 		}
 	}
 
@@ -484,6 +504,15 @@ class Connection
 			}
 
 			throw $ce;
+		} catch (NetworkError $ne) {
+			if ($this->canRetryError($ne)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->delete($url);
+			}
+
+			throw $ne;
 		}
 	}
 
@@ -517,6 +546,15 @@ class Connection
 			}
 
 			throw $ce;
+		} catch (NetworkError $ne) {
+			if ($this->canRetryError($ne)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->delete($url);
+			}
+
+			throw $ne;
 		}
 	}
 
@@ -573,6 +611,15 @@ class Connection
 			}
 
 			throw $ce;
+		} catch (NetworkError $ne) {
+			if ($this->canRetryError($ne)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->delete($url);
+			}
+
+			throw $ne;
 		}
 	}
 
@@ -607,6 +654,15 @@ class Connection
 			}
 
 			throw $ce;
+		} catch (NetworkError $ne) {
+			if ($this->canRetryError($ne)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->delete($url);
+			}
+
+			throw $ne;
 		}
 	}
 
@@ -652,7 +708,20 @@ class Connection
 	 */
 	private function canRetryRequest(ClientError $ce)
 	{
-		return ($this->autoRetry && $ce->getCode() === 429);
+		return ($this->autoRetry && in_array((int)$ce->getCode(), array( 408, 429 )));
+	}
+
+	private function canRetryError(NetworkError $ne)
+	{
+		if (
+			$this->autoRetry
+			&& in_array((int)$ne->getCode(), array( CURLE_OPERATION_TIMEDOUT, CURLE_GOT_NOTHING, CURLE_RECV_ERROR ))
+			&& $this->retryAttempts < self::MAX_RETRY
+		) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
