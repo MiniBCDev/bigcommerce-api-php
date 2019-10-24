@@ -446,14 +446,23 @@ class Connection
 
 			throw $ce;
 		} catch (NetworkError $ne) {
-			if ($this->canRetryError($ne)) {
+			if ($this->canRetryNetworkError($ne)) {
 				sleep(60);
 				$this->retryAttempts++;
 
-				return $this->delete($url);
+				return $this->get($url, $query);
 			}
 
 			throw $ne;
+		} catch (ServerError $se) {
+			if ($this->canRetryServerError($se)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->get($url, $query);
+			}
+
+			throw $se;
 		}
 	}
 
@@ -505,14 +514,23 @@ class Connection
 
 			throw $ce;
 		} catch (NetworkError $ne) {
-			if ($this->canRetryError($ne)) {
+			if ($this->canRetryNetworkError($ne)) {
 				sleep(60);
 				$this->retryAttempts++;
 
-				return $this->delete($url);
+				return $this->post($url, $body);
 			}
 
 			throw $ne;
+		} catch (ServerError $se) {
+			if ($this->canRetryServerError($se)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->post($url, $body);
+			}
+
+			throw $se;
 		}
 	}
 
@@ -547,14 +565,23 @@ class Connection
 
 			throw $ce;
 		} catch (NetworkError $ne) {
-			if ($this->canRetryError($ne)) {
+			if ($this->canRetryNetworkError($ne)) {
 				sleep(60);
 				$this->retryAttempts++;
 
-				return $this->delete($url);
+				return $this->head($url);
 			}
 
 			throw $ne;
+		} catch (ServerError $se) {
+			if ($this->canRetryServerError($se)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->head($url);
+			}
+
+			throw $se;
 		}
 	}
 
@@ -612,14 +639,23 @@ class Connection
 
 			throw $ce;
 		} catch (NetworkError $ne) {
-			if ($this->canRetryError($ne)) {
+			if ($this->canRetryNetworkError($ne)) {
 				sleep(60);
 				$this->retryAttempts++;
 
-				return $this->delete($url);
+				return $this->put($url, $body);
 			}
 
 			throw $ne;
+		} catch (ServerError $se) {
+			if ($this->canRetryServerError($se)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->put($url, $body);
+			}
+
+			throw $se;
 		}
 	}
 
@@ -655,7 +691,16 @@ class Connection
 
 			throw $ce;
 		} catch (NetworkError $ne) {
-			if ($this->canRetryError($ne)) {
+			if ($this->canRetryNetworkError($ne)) {
+				sleep(60);
+				$this->retryAttempts++;
+
+				return $this->delete($url);
+			}
+
+			throw $ne;
+		} catch (ServerError $ne) {
+			if ($this->canRetryServerError($ne)) {
 				sleep(60);
 				$this->retryAttempts++;
 
@@ -711,7 +756,26 @@ class Connection
 		return ($this->autoRetry && in_array((int)$ce->getCode(), array( 408, 429 )));
 	}
 
-	private function canRetryError(NetworkError $ne)
+	/**
+	 * returns true if another attempt should be made
+	 *
+	 * @param ServerError $se
+	 * @return bool
+	 */
+	private function canRetryServerError(ServerError $se)
+	{
+		if (
+			$this->autoRetry
+			&& in_array((int)$se->getCode(), array( 500, 502 ))
+			&& $this->retryAttempts < self::MAX_RETRY
+		) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private function canRetryNetworkError(NetworkError $ne)
 	{
 		if (
 			$this->autoRetry
