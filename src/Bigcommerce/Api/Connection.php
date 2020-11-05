@@ -779,7 +779,7 @@ class Connection
 	{
 		if (
 			$this->autoRetry
-			&& in_array((int)$ne->getCode(), array( CURLE_OPERATION_TIMEDOUT, CURLE_GOT_NOTHING, CURLE_RECV_ERROR ))
+			&& in_array((int)$ne->getCode(), array( CURLE_OPERATION_TIMEDOUT, CURLE_GOT_NOTHING, CURLE_RECV_ERROR, CURLE_SSL_CONNECT_ERROR ))
 			&& $this->retryAttempts < self::MAX_RETRY
 		) {
 			return true;
